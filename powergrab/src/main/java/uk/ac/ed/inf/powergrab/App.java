@@ -16,9 +16,8 @@
  *
  ******************************************************************************/
 package uk.ac.ed.inf.powergrab;
-import java.net.MalformedURLException;
+
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.stream.Collectors;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,19 +25,32 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class App {
-	private URL mapUrl; // url object of map
+	private String mapSource; // url object of map
 	private Position startPosition;
+	private Drone drone;
 
 	// construct a new game with given parameters
 	public App(URL mapUrl, Position startPosition, String droneType) throws IOException {
-		this.mapUrl = mapUrl;
+		
 		this.startPosition = startPosition;
-		String mapSource = getMap();
-		System.out.println(mapSource);
+		
+		this.mapSource = getMap(mapUrl);
+		System.out.println(this.mapSource);
+
+		switch (droneType) {
+		case "stateless":
+			drone = new StatelessDrone(this.startPosition);
+			break;
+		case "stateful":
+			drone = new StatefulDrone(this.startPosition);
+			break;
+		default:
+			System.out.println("Drone type does not exist.");
+		}
 	}
 
-	private String getMap() throws IOException {
-		InputStream is = this.mapUrl.openConnection().getInputStream();
+	private String getMap(URL mapUrl) throws IOException {
+		InputStream is = mapUrl.openConnection().getInputStream();
 		try {
 			BufferedReader in = new BufferedReader(new InputStreamReader(is));
 			return in.lines().collect(Collectors.joining(System.lineSeparator()));
@@ -48,7 +60,10 @@ public class App {
 		}
 	}
 
-	
+	public void play() {
+
+	}
+
 	public static void main(String[] args) throws IOException {
 
 		// Construct string of URL to download the map from
