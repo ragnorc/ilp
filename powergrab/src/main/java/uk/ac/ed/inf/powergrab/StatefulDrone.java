@@ -11,13 +11,13 @@ package uk.ac.ed.inf.powergrab;
 
 class StatefulDrone extends Drone {
 
-	StatefulDrone(Position startPosition) {
-		super(startPosition);
+	StatefulDrone(Position startPosition, String mapSource, int seed) {
+		super(startPosition,mapSource, seed);
 
 	}
 
-	String nextMove() {
-		return "";
+	Direction nextMove() {
+		return Direction.N;
 
 	}
 

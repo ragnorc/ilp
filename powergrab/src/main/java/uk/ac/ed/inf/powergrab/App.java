@@ -28,21 +28,23 @@ public class App {
 	private String mapSource; // url object of map
 	private Position startPosition;
 	private Drone drone;
+	private int seed;
 
 	// construct a new game with given parameters
-	public App(URL mapUrl, Position startPosition, String droneType) throws IOException {
+	public App(URL mapUrl, Position startPosition,int seed, String droneType, ) throws IOException {
 		
 		this.startPosition = startPosition;
+		this.seed = seed;
 		
 		this.mapSource = getMap(mapUrl);
-		System.out.println(this.mapSource);
+		//System.out.println(this.mapSource);
 
 		switch (droneType) {
 		case "stateless":
-			drone = new StatelessDrone(this.startPosition);
+			drone = new StatelessDrone(this.startPosition, this.mapSource, this.seed);
 			break;
 		case "stateful":
-			drone = new StatefulDrone(this.startPosition);
+			drone = new StatefulDrone(this.startPosition, this.mapSource, this.seed);
 			break;
 		default:
 			System.out.println("Drone type does not exist.");
@@ -61,7 +63,7 @@ public class App {
 	}
 
 	public void play() {
-
+		drone.nextMove();    
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -75,7 +77,8 @@ public class App {
 
 		Position startPosition = new Position(Double.parseDouble(args[3]), Double.parseDouble(args[4]));
 
-		App game = new App(mapUrl, startPosition, args[6]);
+		App game = new App(mapUrl, startPosition, Integer.parseInt(args[5]), args[6]);
+		game.play();
 
 	}
 
