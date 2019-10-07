@@ -31,7 +31,7 @@ public class App {
 	private int seed;
 
 	// construct a new game with given parameters
-	public App(URL mapUrl, Position startPosition,int seed, String droneType, ) throws IOException {
+	public App(URL mapUrl, Position startPosition,int seed, String droneType ) throws IOException {
 		
 		this.startPosition = startPosition;
 		this.seed = seed;
@@ -63,7 +63,10 @@ public class App {
 	}
 
 	public void play() {
-		drone.nextMove();    
+		while (this.drone.power > 0 && this.drone.numMoves < 250) {
+			this.drone.move(); 
+		}
+		   
 	}
 
 	public static void main(String[] args) throws IOException {

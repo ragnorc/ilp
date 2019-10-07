@@ -26,18 +26,19 @@ class StatelessDrone extends Drone {
 	}
 
 	Move nextMove() {
-		List<Direction> randomDirections = Arrays.asList(Direction.values());
+		
+		List<Direction> randomDirections =
+                new ArrayList<Direction>(EnumSet.allOf(Direction.class));
 		Move currentBestMove = null;
 		for (Direction potentialDirection : Direction.values()) {
 
 			Position potentialPosition = this.position.nextPosition(potentialDirection);
 			if (potentialPosition.inPlayArea()) {
-
-				List<Feature> features = FeatureCollection.fromJson(mapSource).features();
 				List<Feature> featuresInReach = new ArrayList<Feature>();
 				double currentBiggestUtility = 0; // 0 utility corresponds to moving somewhere where there is nothing
 
-				for (Feature feature : features) {
+				for (Integer i = 0; i<this.features.size(); i++) {
+					Feature feature = this.features.get(i);
 					double longitude = ((Point) feature.geometry()).coordinates().get(0);
 					double latitude = ((Point) feature.geometry()).coordinates().get(1);
 
@@ -52,11 +53,11 @@ class StatelessDrone extends Drone {
 						double utility = this.getUtility(coinGain, powerGain);
 
 						if (utility > currentBiggestUtility) {
-							currentBestMove = new Move(potentialDirection, coinGain, powerGain - 1.25);
+							currentBestMove = new Move(potentialDirection, coinGain, powerGain - 1.25, i);
 
 						}
 
-						System.out.println(feature);
+						//System.out.println(feature);
 
 					}
 
@@ -69,7 +70,7 @@ class StatelessDrone extends Drone {
 
 		if (currentBestMove == null) {
 			currentBestMove = new Move(randomDirections.get(this.random.nextInt(randomDirections.size() - 1)), 0.0,
-					-1.25);
+					-1.25,null);
 		}
 
 		return currentBestMove;
