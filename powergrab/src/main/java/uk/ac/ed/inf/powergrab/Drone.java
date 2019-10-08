@@ -1,5 +1,6 @@
 /******************************************************************************
  *  Class:   Drone 
+ *  Description: Implements the attributes and methods that are shared by both the stateless and stafeful drone.
  *  Author:  Ragnor Comerford
  *
  *
@@ -11,7 +12,6 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import com.mapbox.geojson.Feature;
@@ -42,12 +42,12 @@ abstract class Drone {
 		this.random = new Random(seed);
 		this.features = (ArrayList<Feature>) FeatureCollection.fromJson(this.mapSource).features();
 		this.orginalFeatures = (ArrayList<Feature>) FeatureCollection.fromJson(this.mapSource).features();
-	    this.visitedPoints = new ArrayList<Point>();
-	    Point currentPoint = Point.fromLngLat(startPosition.longitude, startPosition.latitude);
-	    visitedPoints.add(currentPoint);
-	    this.fileNamePrefix = fileNamePrefix;
-	    FileWriter fr = new FileWriter(fileNamePrefix+"txt", false);
-	    this.flightBWriter = new BufferedWriter(fr);
+		this.visitedPoints = new ArrayList<Point>();
+		Point currentPoint = Point.fromLngLat(startPosition.longitude, startPosition.latitude);
+		visitedPoints.add(currentPoint);
+		this.fileNamePrefix = fileNamePrefix;
+		FileWriter fr = new FileWriter(fileNamePrefix + "txt", false);
+		this.flightBWriter = new BufferedWriter(fr);
 	}
 
 	abstract Move nextMove();
@@ -61,23 +61,22 @@ abstract class Drone {
 		visitedPoints.add(nextPoint);
 		this.power = this.power + move.powerGain - 1.25;
 		this.coins = this.coins + move.coinGain;
-		writeString += String.format(" %f %f",this.coins,this.power);
+		writeString += String.format(" %f %f", this.coins, this.power);
 		numMoves++;
 		if (move.feature != null) {
 			double oldCoins = move.feature.getProperty("coins").getAsDouble();
 			double oldPower = move.feature.getProperty("power").getAsDouble();
-			//Feature updatedFeature = move.feature);
-			//int featureIndex = this.features.indexOf(move.feature);
+			// Feature updatedFeature = move.feature);
+			// int featureIndex = this.features.indexOf(move.feature);
 			System.out.println(move.feature);
 			move.feature.removeProperty("coins");
 			move.feature.removeProperty("power");
-			move.feature.addStringProperty("coins",Double.toString(oldCoins-move.coinGain));
-			move.feature.addStringProperty("power",Double.toString(oldPower-move.powerGain));
-			System.out.println("test"+move.powerGain);
-			
-			
+			move.feature.addStringProperty("coins", Double.toString(oldCoins - move.coinGain));
+			move.feature.addStringProperty("power", Double.toString(oldPower - move.powerGain));
+			System.out.println("test" + move.powerGain);
+
 		}
-		
+
 		this.flightBWriter.write(writeString);
 		this.flightBWriter.newLine();
 
@@ -87,9 +86,8 @@ abstract class Drone {
 		System.out.println(this.numMoves);
 
 	}
-	
-	
-	 void writeFlightPath() throws IOException {
+
+	void writeFlightPath() throws IOException {
 
 		LineString dronePath = LineString.fromLngLats(this.visitedPoints);
 		Feature dronePathFeature = Feature.fromGeometry(dronePath);
@@ -97,7 +95,7 @@ abstract class Drone {
 		FeatureCollection featureCollection = FeatureCollection.fromFeatures(this.orginalFeatures);
 		String newMap = featureCollection.toJson().toString();
 		System.out.println(newMap);
-		try (FileWriter file = new FileWriter(this.fileNamePrefix+"geojson")) {
+		try (FileWriter file = new FileWriter(this.fileNamePrefix + "geojson")) {
 			file.write(newMap);
 			System.out.println("Successfully wrote flight path to file.");
 
@@ -105,9 +103,57 @@ abstract class Drone {
 
 	}
 
-	double getUtility(double stationCoins, double stationPower) {
+	
+	double getUtilityOfStation(double stationCoins, double stationPower) {
 
 		return (stationPower / this.power) + (stationCoins / this.coins);
+
+	}
+
+	Move getMoveToStation(Position position, Direction direction) {
+
+		// A position with no features has a basis utility of 0.
+		double utility = 0.0;
+		double nearestDistance = Double.POSITIVE_INFINITY;
+		Move move = new Move(direction, 0.0, 0.0, utility, null);
+		;
+
+		// For the nearest station we add up its negative or positive utility to the
+		// overall utility.
+
+		for (Integer i = 0; i < this.features.size(); i++) {
+			Feature feature = this.features.get(i);
+			double longitude = ((Point) feature.geometry()).coordinates().get(0);
+			double latitude = ((Point) feature.geometry()).coordinates().get(1);
+
+			double distanceToStation = Math
+					.sqrt(Math.pow(longitude - position.longitude, 2) + Math.pow(latitude - position.latitude, 2));
+
+			if (distanceToStation <= 0.00025 && distanceToStation < nearestDistance) {
+
+				double coinGain = feature.getProperty("coins").getAsDouble();
+				double powerGain = feature.getProperty("power").getAsDouble();
+				if (coinGain < 0) {
+
+					coinGain = Math.max(coinGain, (-1) * this.coins); // Drone can only loose as much coins as
+																		// it has. No debt.
+				}
+
+				if (powerGain < 0) {
+
+					powerGain = Math.max(powerGain, (-1) * this.power); // Drone can only loose as much power as
+																		// it has. No debt.
+				}
+
+				utility = this.getUtilityOfStation(coinGain, powerGain);
+
+				move = new Move(direction, coinGain, powerGain, utility, feature);
+
+			}
+
+		}
+
+		return move;
 
 	}
 
