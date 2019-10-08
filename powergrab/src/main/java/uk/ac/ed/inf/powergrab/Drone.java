@@ -7,12 +7,17 @@
  ******************************************************************************/
 package uk.ac.ed.inf.powergrab;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
+import com.mapbox.geojson.LineString;
+import com.mapbox.geojson.Point;
 
 // Lack of modifier indicates that the following class is package-private
 
@@ -22,24 +27,41 @@ abstract class Drone {
 	protected double power = 250;
 	protected double coins = 0;
 	protected ArrayList<Feature> features;
+	protected ArrayList<Feature> orginalFeatures;
 	protected String mapSource;
 	protected Random random;
 	protected int numMoves = 0;
+	protected ArrayList<Point> visitedPoints;
+	protected String flightProtocol;
+	protected BufferedWriter flightBWriter;
+	protected String fileNamePrefix;
 
-	Drone(Position startPosition, String mapSource, int seed) {
+	Drone(Position startPosition, String mapSource, int seed, String fileNamePrefix) throws IOException {
 		this.position = startPosition;
 		this.mapSource = mapSource;
 		this.random = new Random(seed);
 		this.features = (ArrayList<Feature>) FeatureCollection.fromJson(this.mapSource).features();
+		this.orginalFeatures = (ArrayList<Feature>) FeatureCollection.fromJson(this.mapSource).features();
+	    this.visitedPoints = new ArrayList<Point>();
+	    Point currentPoint = Point.fromLngLat(startPosition.longitude, startPosition.latitude);
+	    visitedPoints.add(currentPoint);
+	    this.fileNamePrefix = fileNamePrefix;
+	    FileWriter fr = new FileWriter(fileNamePrefix+"txt", false);
+	    this.flightBWriter = new BufferedWriter(fr);
 	}
 
 	abstract Move nextMove();
 
-	void move() {
+	void move() throws IOException {
 		Move move = this.nextMove();
+		String writeString = this.position.latitude + " " + this.position.longitude + " " + move.direction;
 		this.position = this.position.nextPosition(move.direction);
+		writeString += " " + this.position.latitude + " " + this.position.longitude;
+		Point nextPoint = Point.fromLngLat(this.position.longitude, this.position.latitude);
+		visitedPoints.add(nextPoint);
 		this.power = this.power + move.powerGain - 1.25;
 		this.coins = this.coins + move.coinGain;
+		writeString += String.format(" %f %f",this.coins,this.power);
 		numMoves++;
 		if (move.feature != null) {
 			double oldCoins = move.feature.getProperty("coins").getAsDouble();
@@ -52,17 +74,34 @@ abstract class Drone {
 			move.feature.addStringProperty("coins",Double.toString(oldCoins-move.coinGain));
 			move.feature.addStringProperty("power",Double.toString(oldPower-move.powerGain));
 			System.out.println("test"+move.powerGain);
-			//System.out.println(this.features.get(this.features.indexOf(this.features.get(0))));
-			//this.features.set(featureIndex,move.feature);
-			//this.features.add(updatedFeature);
-
-			// System.out.println(this.features.get(move.feature.indexOf()));
+			
+			
 		}
+		
+		this.flightBWriter.write(writeString);
+		this.flightBWriter.newLine();
 
 		System.out.println(move.direction);
 		System.out.println(this.coins);
 		System.out.println(this.power);
 		System.out.println(this.numMoves);
+
+	}
+	
+	
+	 void writeFlightPath() throws IOException {
+
+		LineString dronePath = LineString.fromLngLats(this.visitedPoints);
+		Feature dronePathFeature = Feature.fromGeometry(dronePath);
+		this.orginalFeatures.add(dronePathFeature);
+		FeatureCollection featureCollection = FeatureCollection.fromFeatures(this.orginalFeatures);
+		String newMap = featureCollection.toJson().toString();
+		System.out.println(newMap);
+		try (FileWriter file = new FileWriter(this.fileNamePrefix+"geojson")) {
+			file.write(newMap);
+			System.out.println("Successfully wrote flight path to file.");
+
+		}
 
 	}
 

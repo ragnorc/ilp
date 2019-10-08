@@ -7,6 +7,7 @@
  ******************************************************************************/
 package uk.ac.ed.inf.powergrab;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -20,8 +21,8 @@ import com.mapbox.geojson.Point;
 
 class StatelessDrone extends Drone {
 
-	StatelessDrone(Position startPosition, String mapSource, int seed) {
-		super(startPosition, mapSource, seed);
+	StatelessDrone(Position startPosition, String mapSource, int seed, String fileNamePrefix) throws IOException {
+		super(startPosition, mapSource, seed, fileNamePrefix);
 
 	}
 
