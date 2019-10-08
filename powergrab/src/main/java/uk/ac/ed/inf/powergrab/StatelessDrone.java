@@ -64,7 +64,7 @@ class StatelessDrone extends Drone {
 						double utility = this.getUtility(coinGain, powerGain);
 
 						if (utility > currentBiggestUtility) {
-							currentBestMove = new Move(potentialDirection, coinGain, powerGain, feature, i);
+							currentBestMove = new Move(potentialDirection, coinGain, powerGain, feature);
 
 						}
 
@@ -80,7 +80,7 @@ class StatelessDrone extends Drone {
 		;
 
 		if (currentBestMove == null) {
-			currentBestMove = new Move(randomDirections.get(this.random.nextInt(randomDirections.size() - 1)), 0.0,0.0, null, null);
+			currentBestMove = new Move(randomDirections.get(this.random.nextInt(randomDirections.size() - 1)), 0.0,0.0, null);
 		}
 
 		return currentBestMove;

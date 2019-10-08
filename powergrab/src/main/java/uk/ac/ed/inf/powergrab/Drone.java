@@ -42,17 +42,17 @@ abstract class Drone {
 		this.coins = this.coins + move.coinGain;
 		numMoves++;
 		if (move.feature != null) {
-			double oldCoins = this.features.get((int)move.featureIndex).getProperty("coins").getAsDouble();
-			double oldPower = this.features.get((int)move.featureIndex).getProperty("power").getAsDouble();
+			double oldCoins = move.feature.getProperty("coins").getAsDouble();
+			double oldPower = move.feature.getProperty("power").getAsDouble();
 			//Feature updatedFeature = move.feature);
 			//int featureIndex = this.features.indexOf(move.feature);
-			System.out.println(this.features.get((int)move.featureIndex));
-			this.features.get((int)move.featureIndex).removeProperty("coins");
-			this.features.get((int)move.featureIndex).removeProperty("power");
-			this.features.get((int)move.featureIndex).addStringProperty("coins",Double.toString(oldCoins-move.coinGain));
-			this.features.get((int)move.featureIndex).addStringProperty("power",Double.toString(oldPower-move.powerGain));
+			System.out.println(move.feature);
+			move.feature.removeProperty("coins");
+			move.feature.removeProperty("power");
+			move.feature.addStringProperty("coins",Double.toString(oldCoins-move.coinGain));
+			move.feature.addStringProperty("power",Double.toString(oldPower-move.powerGain));
 			System.out.println("test"+move.powerGain);
-			System.out.println(this.features.get((int)move.featureIndex));
+			//System.out.println(this.features.get(this.features.indexOf(this.features.get(0))));
 			//this.features.set(featureIndex,move.feature);
 			//this.features.add(updatedFeature);
 
