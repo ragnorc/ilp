@@ -17,7 +17,7 @@ class StatefulDrone extends Drone {
 	}
 
 	Move nextMove() {
-		return new Move(Direction.N,0.0,0.0,null);
+		return new Move(Direction.N,0.0,0.0,null,);
 
 	}
 
