@@ -148,6 +148,8 @@ abstract class Drone {
 				utility = this.getUtilityOfStation(coinGain, powerGain);
 
 				move = new Move(direction, coinGain, powerGain, utility, feature);
+				nearestDistance = distanceToStation;
+				
 
 			}
 
