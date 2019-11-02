@@ -58,10 +58,10 @@ public class App {
 
 		switch (droneType) {
 		case "stateless":
-			drone = new StatelessDrone(this.startPosition, this.mapSource, this.seed, fileNamePrefix);
+			drone = new StatelessDrone(this.startPosition, 250, this.mapSource, this.seed, fileNamePrefix);
 			break;
 		case "stateful":
-			drone = new StatefulDrone(this.startPosition, this.mapSource, this.seed, fileNamePrefix);
+			drone = new StatefulDrone(this.startPosition, 250, this.mapSource, this.seed, fileNamePrefix);
 			break;
 		default:
 			System.out.println("Drone type does not exist.");
@@ -80,8 +80,9 @@ public class App {
 	}
 
 	public void play() throws IOException {
-		while (this.drone.power > 0 && this.drone.numMoves < 250) {
-			this.drone.move();
+		// TODO: Change max moves to 250 back
+		while (this.drone.power > 0 && this.drone.numMoves < 1) {
+			this.drone.move(this.drone.nextMove());
 		}
 		this.drone.writeFlightPath();
 		

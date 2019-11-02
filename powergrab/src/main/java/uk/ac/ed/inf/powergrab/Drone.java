@@ -24,7 +24,7 @@ import com.mapbox.geojson.Point;
 abstract class Drone {
 
 	protected Position position;
-	protected double power = 250;
+	protected double power;
 	protected double coins = 0;
 	protected ArrayList<Feature> features;
 	protected ArrayList<Feature> orginalFeatures;
@@ -36,8 +36,9 @@ abstract class Drone {
 	protected BufferedWriter flightBWriter;
 	protected String fileNamePrefix;
 
-	Drone(Position startPosition, String mapSource, int seed, String fileNamePrefix) throws IOException {
+	Drone(Position startPosition, double power, String mapSource, int seed, String fileNamePrefix ) throws IOException {
 		this.position = startPosition;
+		this.power = power;
 		this.mapSource = mapSource;
 		this.random = new Random(seed);
 		this.features = (ArrayList<Feature>) FeatureCollection.fromJson(this.mapSource).features();
@@ -50,10 +51,9 @@ abstract class Drone {
 		this.flightBWriter = new BufferedWriter(fr);
 	}
 
-	abstract Move nextMove();
+	abstract Move nextMove() throws IOException;
 
-	void move() throws IOException {
-		Move move = this.nextMove();
+	void move(Move move) throws IOException {
 		String writeString = this.position.latitude + " " + this.position.longitude + " " + move.direction;
 		this.position = this.position.nextPosition(move.direction);
 		writeString += " " + this.position.latitude + " " + this.position.longitude;
@@ -68,22 +68,22 @@ abstract class Drone {
 			double oldPower = move.feature.getProperty("power").getAsDouble();
 			// Feature updatedFeature = move.feature);
 			// int featureIndex = this.features.indexOf(move.feature);
-			System.out.println(move.feature);
+			//System.out.println(move.feature);
 			move.feature.removeProperty("coins");
 			move.feature.removeProperty("power");
 			move.feature.addStringProperty("coins", Double.toString(oldCoins - move.coinGain));
 			move.feature.addStringProperty("power", Double.toString(oldPower - move.powerGain));
-			System.out.println("test" + move.powerGain);
+			//System.out.println("test" + move.powerGain);
 
 		}
 
 		this.flightBWriter.write(writeString);
 		this.flightBWriter.newLine();
 
-		System.out.println(move.direction);
-		System.out.println(this.coins);
-		System.out.println(this.power);
-		System.out.println(this.numMoves);
+		//System.out.println(move.direction);
+	//	System.out.println(this.coins);
+		//System.out.println(this.power);
+		//System.out.println(this.numMoves);
 
 	}
 
@@ -109,17 +109,17 @@ abstract class Drone {
 		return (stationPower / this.power) + (stationCoins / this.coins);
 
 	}
+	
+	// 
 
-	Move getMoveToStation(Position position, Direction direction) {
+	Move getMoveInDirection(Position position, Direction direction) {
 
 		// A position with no features has a basis utility of 0.
 		double utility = 0.0;
 		double nearestDistance = Double.POSITIVE_INFINITY;
 		Move move = new Move(direction, 0.0, 0.0, utility, null);
-		;
+		
 
-		// For the nearest station we add up its negative or positive utility to the
-		// overall utility.
 
 		for (Integer i = 0; i < this.features.size(); i++) {
 			Feature feature = this.features.get(i);

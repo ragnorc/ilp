@@ -21,8 +21,8 @@ import com.mapbox.geojson.Point;
 
 class StatelessDrone extends Drone {
 
-	StatelessDrone(Position startPosition, String mapSource, int seed, String fileNamePrefix) throws IOException {
-		super(startPosition, mapSource, seed, fileNamePrefix);
+	StatelessDrone(Position startPosition, double power, String mapSource, int seed, String fileNamePrefix) throws IOException {
+		super(startPosition, power, mapSource, seed, fileNamePrefix);
 
 	}
 
@@ -36,7 +36,7 @@ class StatelessDrone extends Drone {
 			Position potentialPosition = this.position.nextPosition(potentialDirection);
 
 			if (potentialPosition.inPlayArea()) {
-				Move potentialMove = this.getMoveToStation(potentialPosition, potentialDirection);
+				Move potentialMove = this.getMoveInDirection(potentialPosition, potentialDirection);
 
 				if (potentialMove.utility == 0) {
 					zeroUtilityMoves.add(potentialMove);
@@ -54,7 +54,7 @@ class StatelessDrone extends Drone {
 		// Pick random zero-utility move if there exists one and if no station with positive utility was found
 
 		if (currentBestMove == null || (currentBestMove.utility < 0 && zeroUtilityMoves.size() > 0)) {
-			System.out.println("Size" + zeroUtilityMoves.size());
+			//System.out.println("Size" + zeroUtilityMoves.size());
 
 			currentBestMove = zeroUtilityMoves.get(this.random.nextInt(zeroUtilityMoves.size() - 1));
 
