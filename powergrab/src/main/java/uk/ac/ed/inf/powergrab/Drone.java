@@ -21,7 +21,7 @@ import com.mapbox.geojson.Point;
 
 // Lack of modifier indicates that the following class is package-private
 
-abstract class Drone {
+abstract class Drone implements Cloneable {
 
 	protected Position position;
 	protected double power;
@@ -51,7 +51,7 @@ abstract class Drone {
 		this.flightBWriter = new BufferedWriter(fr);
 	}
 
-	abstract Move nextMove() throws IOException;
+	abstract Move nextMove() throws IOException, CloneNotSupportedException;
 
 	void move(Move move) throws IOException {
 		String writeString = this.position.latitude + " " + this.position.longitude + " " + move.direction;
@@ -158,5 +158,11 @@ abstract class Drone {
 		return move;
 
 	}
+	
+	public Object clone() throws
+    CloneNotSupportedException 
+{ 
+return super.clone(); 
+} 
 
 }

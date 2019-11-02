@@ -20,7 +20,7 @@ class MonteCarloNode {
 	Drone simulationDrone;
 	String mapSource;
 
-	MonteCarloNode(MonteCarloNode parent, Position position, Direction direction, String mapSource) throws IOException {
+	MonteCarloNode(MonteCarloNode parent, Position position, Direction direction, String mapSource) throws IOException, CloneNotSupportedException {
 		this.position = position;
 		this.parent = parent;
 		this.direction = direction;
@@ -28,25 +28,29 @@ class MonteCarloNode {
 		this.depth = (parent == null) ? 0 : parent.depth + 1;
 		
 		if (parent == null) {
-			this.simulationDrone = new StatelessDrone(position, 250, mapSource,  0, "simulation");
+			this.simulationDrone = new StatelessDrone(position, 250, mapSource,  0, "simulation.");
 			
 		}
 		else {
 			// Create simulation drone based on path of current leaf
 		
-		this.simulationDrone = new StatelessDrone(parent.simulationDrone.position, parent.simulationDrone.power, parent.simulationDrone.mapSource,  0, "simulation");
+		this.simulationDrone =  (Drone) parent.simulationDrone.clone(); //new StatelessDrone(parent.simulationDrone.position, parent.simulationDrone.power, parent.simulationDrone.mapSource,  0, "simulation.");
 		this.simulationDrone.move(this.simulationDrone.getMoveInDirection(parent.position, direction));
 		}
-		//TODO: 
+		//TODO: Check that it is in play area
 		
 		for (Direction potentialDirection : Direction.values()) {
-			availableNextDirections.add(potentialDirection);
+			if((position.nextPosition(potentialDirection)).inPlayArea())
+			{
+				availableNextDirections.add(potentialDirection);
+			}
+			
 
 		}
 
 	}
 
-	MonteCarloNode getNextChild() throws IOException {
+	MonteCarloNode getNextChild() throws IOException, CloneNotSupportedException {
 
 		if (this.depth < 250) {
 

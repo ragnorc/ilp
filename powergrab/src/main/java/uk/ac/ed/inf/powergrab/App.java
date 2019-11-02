@@ -79,18 +79,24 @@ public class App {
 		}
 	}
 
-	public void play() throws IOException {
+	public void play() throws IOException, CloneNotSupportedException {
 		// TODO: Change max moves to 250 back
+		int i = 1;
 		while (this.drone.power > 0 && this.drone.numMoves < 1) {
 			this.drone.move(this.drone.nextMove());
+			System.out.println("Move"+i);
+			i++;
 		}
+		
+		System.out.println(this.drone.coins);
+		System.out.println(this.drone.power);
 		this.drone.writeFlightPath();
 		
 	}
 
 
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, CloneNotSupportedException {
 
 		App game = new App(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
 		game.play();
