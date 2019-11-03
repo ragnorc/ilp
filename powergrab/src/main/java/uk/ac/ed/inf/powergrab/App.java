@@ -82,9 +82,14 @@ public class App {
 	public void play() throws IOException, CloneNotSupportedException {
 		// TODO: Change max moves to 250 back
 		int i = 1;
-		while (this.drone.power > 0 && this.drone.numMoves < 1) {
+		while (this.drone.power > 0 && this.drone.numMoves < 10) {
+			Move nextMove = this.drone.nextMove();
+			if (nextMove == null) {
+				System.out.println("Drone got stuck. Ending early");
+				break;
+			}
 			this.drone.move(this.drone.nextMove());
-			System.out.println("Move"+i);
+			//System.out.println("Move"+i);
 			i++;
 		}
 		

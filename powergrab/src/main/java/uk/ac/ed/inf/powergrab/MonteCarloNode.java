@@ -13,6 +13,7 @@ class MonteCarloNode {
 	
 	MonteCarloNode parent;
 	ArrayList<MonteCarloNode> children = new ArrayList<MonteCarloNode>();
+	ArrayList<Direction> path = new ArrayList<Direction>();
 	Stack<Direction> availableNextDirections  = new Stack<Direction>();
 	int depth = 0;
 	Position position;
@@ -27,8 +28,9 @@ class MonteCarloNode {
 		this.mapSource = mapSource;
 		this.depth = (parent == null) ? 0 : parent.depth + 1;
 		
+		//System.out.print("depth"+this.depth);
 		if (parent == null) {
-			this.simulationDrone = new StatelessDrone(position, 250, mapSource,  0, "simulation.");
+			this.simulationDrone = new StatelessDrone(position, 250, mapSource, 5678, "simulation.");
 			
 		}
 		else {
@@ -36,6 +38,9 @@ class MonteCarloNode {
 		
 		this.simulationDrone =  (Drone) parent.simulationDrone.clone(); //new StatelessDrone(parent.simulationDrone.position, parent.simulationDrone.power, parent.simulationDrone.mapSource,  0, "simulation.");
 		this.simulationDrone.move(this.simulationDrone.getMoveInDirection(parent.position, direction));
+		
+		this.path = ((ArrayList<Direction>) parent.path.clone());
+		this.path.add(direction);
 		}
 		//TODO: Check that it is in play area
 		

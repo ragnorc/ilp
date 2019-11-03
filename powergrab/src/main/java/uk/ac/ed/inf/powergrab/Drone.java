@@ -24,6 +24,7 @@ import com.mapbox.geojson.Point;
 abstract class Drone implements Cloneable {
 
 	protected Position position;
+	protected Position startPosition;
 	protected double power;
 	protected double coins = 0;
 	protected ArrayList<Feature> features;
@@ -38,6 +39,7 @@ abstract class Drone implements Cloneable {
 
 	Drone(Position startPosition, double power, String mapSource, int seed, String fileNamePrefix ) throws IOException {
 		this.position = startPosition;
+		this.startPosition = startPosition;
 		this.power = power;
 		this.mapSource = mapSource;
 		this.random = new Random(seed);
@@ -62,7 +64,7 @@ abstract class Drone implements Cloneable {
 		this.power = this.power + move.powerGain - 1.25;
 		this.coins = this.coins + move.coinGain;
 		writeString += String.format(" %f %f", this.coins, this.power);
-		numMoves++;
+		this.numMoves++;
 		if (move.feature != null) {
 			double oldCoins = move.feature.getProperty("coins").getAsDouble();
 			double oldPower = move.feature.getProperty("power").getAsDouble();
@@ -159,10 +161,13 @@ abstract class Drone implements Cloneable {
 
 	}
 	
-	public Object clone() throws
+	public Drone clone() throws
     CloneNotSupportedException 
 { 
-return super.clone(); 
+	Drone cop = (Drone) super.clone();
+	//cop.features = (ArrayList<Feature>) cop.features.clone();
+	
+return cop; 
 } 
 
 }

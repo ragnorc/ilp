@@ -23,11 +23,11 @@ class StatefulDrone extends Drone {
 		MonteCarloNode root = new MonteCarloNode(null, this.position, null, this.mapSource);
 
 		int i = 0;
-		while (i < 100) {
+		while (i < 900) {
 			MonteCarloNode leaf = selection(root);
 			double simulation_result = rollout(leaf);
 			backpropagation(leaf, simulation_result);
-			 System.out.println(leaf.position.longitude+"hi"+simulation_result);
+			 //System.out.println(leaf.position.longitude+" hi "+leaf.position.latitude+" res "+simulation_result+" initpow "+leaf.simulationDrone.numMoves);
 			i++;
 
 		}
@@ -46,22 +46,26 @@ class StatefulDrone extends Drone {
 
 			for (MonteCarloNode child : node.children) {
 				// TODO: SET bias parameter
-				if (child.getUCB1(100) > maxUCBChild.getUCB1(100)) {
+				System.out.println("child"+child.getUCB1(300));
+				if (child.getUCB1(300) > maxUCBChild.getUCB1(300)) {
 
 					maxUCBChild = child;
 
-					// System.out.println("bigger");
+					
 
 				}
 				// System.out.println("ucb"+child.getUCB1(100));
 				// System.out.println("yes"+child.position.longitude);
 
 			}
+			
 			node = maxUCBChild;
-
+			System.out.println("biggest"+maxUCBChild.getUCB1(1)+maxUCBChild.direction.name());
 		}
 
 		MonteCarloNode child = node.getNextChild();
+		System.out.println("childNotUCB"+child.direction.name()+" "+child.depth);
+
 
 		return child == null ? node : child;
 
@@ -72,15 +76,32 @@ class StatefulDrone extends Drone {
 		double preRolloutCoins = node.simulationDrone.coins;
 		double preRolloutPower = node.simulationDrone.power;
 		
-		Drone originalSimulationDrone = (Drone) node.simulationDrone.clone();
-		System.out.println("init power"+node.simulationDrone.power);
+		//Drone originalSimulationDrone = (Drone) node.simulationDrone.clone();
+		
+		/* New Tryyy*/
+		Drone originalSimulationDrone = new StatelessDrone(this.startPosition,250, this.mapSource,5678, "simulation.");
 
-		while (node.simulationDrone.power > 0 && node.simulationDrone.numMoves < 250) {
-			node.simulationDrone.move(node.simulationDrone.nextMove());
+		for (Direction dir : node.path) {
+			originalSimulationDrone.move(originalSimulationDrone.getMoveInDirection(originalSimulationDrone.position, dir));
+			
+		}
+		
+		/* New Tryyy*/
+		
+		//System.out.println(originalSimulationDrone.position.longitude+" hi "+originalSimulationDrone.position.latitude+" mov "+originalSimulationDrone.features.size());
+
+		while (originalSimulationDrone.power > 0 && originalSimulationDrone.numMoves < 250) {
+			
+			Move nextMove = originalSimulationDrone.nextMove();
+			if (nextMove == null) {
+				
+				break;
+			}
+			originalSimulationDrone.move(nextMove);
 			//System.out.println("sim"+node.simulationDrone.coins);
 		}
 
-		double result = node.simulationDrone.coins;
+		double result = originalSimulationDrone.coins;
 		//node.simulationDrone.writeFlightPath();
 		System.out.println(result);
 
@@ -88,7 +109,8 @@ class StatefulDrone extends Drone {
 		//node.simulationDrone.coins = preRolloutCoins;
 		//node.simulationDrone.power = preRolloutPower;
 		//node.simulationDrone.position = preRolloutPosition;
-		node.simulationDrone = originalSimulationDrone;
+		
+		//node.simulationDrone = originalSimulationDrone;
 
 		return result;
 
@@ -111,6 +133,8 @@ class StatefulDrone extends Drone {
 		MonteCarloNode maxChild = node.children.get(0);
 
 		for (MonteCarloNode child : node.children) {
+			System.out.println("childVisits"+child.num_plays);
+
 			// TODO: SET bias parameter
 			if (child.num_plays > maxChild.num_plays) {
 

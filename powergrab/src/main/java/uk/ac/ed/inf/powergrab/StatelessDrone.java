@@ -32,7 +32,7 @@ class StatelessDrone extends Drone {
 		List<Move> zeroUtilityMoves = new ArrayList<Move>();
 		double highestNonZeroUtility = Double.NEGATIVE_INFINITY;
 		Move currentBestMove = null;
-
+        int numNo = 0;
 		for (Direction potentialDirection : Direction.values()) {
 			Position potentialPosition = this.position.nextPosition(potentialDirection);
 
@@ -49,6 +49,9 @@ class StatelessDrone extends Drone {
 				}
 
 			}
+			else {
+				numNo++;
+			}
 
 		}
 
@@ -60,7 +63,11 @@ class StatelessDrone extends Drone {
 
 			if (zeroUtilityMoves.size() == 1) {
 				currentBestMove = zeroUtilityMoves.get(0);
-			} else {
+			} 
+			else if (zeroUtilityMoves.size() != 0) {
+				currentBestMove = zeroUtilityMoves.get(0);
+			
+				//System.out.println("nos"+numNo);
 				currentBestMove = zeroUtilityMoves.get(this.random.nextInt(zeroUtilityMoves.size() - 1));
 
 			}
