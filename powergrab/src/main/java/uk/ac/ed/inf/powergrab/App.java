@@ -38,6 +38,8 @@ public class App {
 	private String droneType;
 	private String date;
 
+	//TODO: Add class privacy settings to all classes and attributes
+	
 	// construct a new game with given parameters
 	public App(String day, String month, String year, String startLat, String startLong, String seed, String droneType)
 			throws IOException {
@@ -82,12 +84,9 @@ public class App {
 	public void play() throws IOException, CloneNotSupportedException {
 		// TODO: Change max moves to 250 back
 		int i = 1;
-		while (this.drone.power > 0 && this.drone.numMoves < 10) {
-			Move nextMove = this.drone.nextMove();
-			if (nextMove == null) {
-				System.out.println("Drone got stuck. Ending early");
-				break;
-			}
+		Move nextMove = this.drone.nextMove();
+		while (nextMove != null) {
+			
 			this.drone.move(this.drone.nextMove());
 			//System.out.println("Move"+i);
 			i++;

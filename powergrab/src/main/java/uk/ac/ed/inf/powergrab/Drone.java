@@ -105,7 +105,7 @@ abstract class Drone implements Cloneable {
 
 	}
 
-	
+//TODO: add distance penalization and pass feature instead of coins/power
 	double getUtilityOfStation(double stationCoins, double stationPower) {
 
 		return (stationPower / this.power) + (stationCoins / this.coins);
