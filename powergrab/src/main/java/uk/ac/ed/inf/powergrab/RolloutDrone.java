@@ -13,12 +13,12 @@ import com.mapbox.geojson.Point;
 //Lack of modifier indicates that the following class is package-private
 
 class RolloutDrone extends Drone {
-	ArrayList<Direction> path;
+	
 
-	RolloutDrone(Position startPosition, double power, String mapSource, int seed, ArrayList<Direction> path)
+	RolloutDrone(Position startPosition, double power, String mapSource, int seed, ArrayList<Direction> pathToFollow, String fileNamePrefix)
 			throws IOException {
-		super(startPosition, power, mapSource, seed, "simulation.");
-		this.path = path;
+		super(startPosition, power, mapSource, seed, fileNamePrefix);
+		this.pathToFollow = pathToFollow;
 
 	}
 
@@ -28,18 +28,21 @@ class RolloutDrone extends Drone {
 
 		if (this.numMoves < 250 && this.power > 0) {
 
-			if (this.path.size() > 0) {
-
+			if (this.pathToFollow.size() > 0) {
+			//	System.out.println("Perform path sequence to node.");
+                 // Perform moves to reach position of current node
 				// TODO: check time complexity of removing
 
-				return this.getMoveInDirection(this.position, this.path.remove(0));
+				return this.getMoveInDirection(this.position, this.pathToFollow.remove(0));
 
 			}
 
 			else {
-				RandomCollection<ArrayList<Direction>> availablePaths = new RandomCollection<>();
+              //  System.out.println("Check Features");
 
-				double biggestUtility = Double.NEGATIVE_INFINITY;
+                WeightedRandomCollection<ArrayList<Direction>> availablePaths = new WeightedRandomCollection<>(this.random);
+
+				//double biggestUtility = Double.NEGATIVE_INFINITY;
 				for (Feature feature : this.features) {
 					double longitude = ((Point) feature.geometry()).coordinates().get(0);
 					double latitude = ((Point) feature.geometry()).coordinates().get(1);
@@ -55,17 +58,20 @@ class RolloutDrone extends Drone {
 					}
 
 				}
-				// Rollout policy. Pick feature with probability proportional to its utility
+				// Rollout policy. Pick feature with probability proportional to its utility. Implement distance dependence
 
 				if (availablePaths.size() > 0) {
-					this.path.addAll(availablePaths.next());
-					return this.getMoveInDirection(this.position, this.path.remove(0));
+                   // System.out.println("Probabilistc Move"+availablePaths.size());
+
+					this.pathToFollow.addAll(availablePaths.next());
+					return this.getMoveInDirection(this.position, this.pathToFollow.remove(0));
 
 				}
 
 				else {
-
+                    //System.out.println("No features available. Return random move.");
 					return this.getMoveInDirection(this.position, Direction.values()[this.random.nextInt(16)]);
+                   
 
 				}
 
@@ -74,6 +80,8 @@ class RolloutDrone extends Drone {
 		}
 
 		else {
+           // System.out.println("End"+this.numMoves);
+
 			return null;
 		}
 

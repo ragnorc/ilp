@@ -36,11 +36,15 @@ abstract class Drone implements Cloneable {
 	protected String flightProtocol;
 	protected BufferedWriter flightBWriter;
 	protected String fileNamePrefix;
+	protected int seed;
+	protected ArrayList<Direction> path = new ArrayList<Direction>();
+	protected ArrayList<Direction> pathToFollow = new ArrayList<Direction>();
 
 	Drone(Position startPosition, double power, String mapSource, int seed, String fileNamePrefix ) throws IOException {
 		this.position = startPosition;
 		this.startPosition = startPosition;
 		this.power = power;
+		this.seed = seed;
 		this.mapSource = mapSource;
 		this.random = new Random(seed);
 		this.features = (ArrayList<Feature>) FeatureCollection.fromJson(this.mapSource).features();
@@ -56,8 +60,12 @@ abstract class Drone implements Cloneable {
 	abstract Move nextMove() throws IOException, CloneNotSupportedException;
 
 	void move(Move move) throws IOException {
-		String writeString = this.position.latitude + " " + this.position.longitude + " " + move.direction;
+		
+
+		//System.out.println("Writestring"+i);
+		String writeString = this.position.latitude + " " + this.position.longitude + " " + move.direction.name();
 		this.position = this.position.nextPosition(move.direction);
+		this.path.add(move.direction);
 		writeString += " " + this.position.latitude + " " + this.position.longitude;
 		Point nextPoint = Point.fromLngLat(this.position.longitude, this.position.latitude);
 		visitedPoints.add(nextPoint);
@@ -96,10 +104,10 @@ abstract class Drone implements Cloneable {
 		this.orginalFeatures.add(dronePathFeature);
 		FeatureCollection featureCollection = FeatureCollection.fromFeatures(this.orginalFeatures);
 		String newMap = featureCollection.toJson().toString();
-		System.out.println(newMap);
+		//System.out.println(newMap);
 		try (FileWriter file = new FileWriter(this.fileNamePrefix + "geojson")) {
 			file.write(newMap);
-			System.out.println("Successfully wrote flight path to file.");
+			//System.out.println("Successfully wrote flight path to file.");
 
 		}
 

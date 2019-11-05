@@ -61,11 +61,11 @@ public class Position {
 
 			distanceToGoal = Math.sqrt(Math.pow(goalPosition.longitude - currentPosition.longitude, 2)
 					+ Math.pow(goalPosition.latitude - currentPosition.latitude, 2));
-			System.out.println(distanceToGoal);
+			//System.out.println(distanceToGoal);
 			path.add(shortestDirection);
 
 		}
-		System.out.println("path" + i);
+		//System.out.println("path" + i);
 
 		return path;
 

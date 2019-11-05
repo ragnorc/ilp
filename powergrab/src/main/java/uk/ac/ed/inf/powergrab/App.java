@@ -87,13 +87,16 @@ public class App {
 		Move nextMove = this.drone.nextMove();
 		while (nextMove != null) {
 			
-			this.drone.move(this.drone.nextMove());
-			//System.out.println("Move"+i);
+			this.drone.move(nextMove);
+			System.out.println(nextMove.direction.name()+" Move "+i);
+			nextMove = this.drone.nextMove();
+			
 			i++;
 		}
 		
 		System.out.println(this.drone.coins);
 		System.out.println(this.drone.power);
+		this.drone.flightBWriter.close();
 		this.drone.writeFlightPath();
 		
 	}

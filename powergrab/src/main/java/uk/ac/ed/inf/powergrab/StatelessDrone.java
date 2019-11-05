@@ -29,7 +29,7 @@ class StatelessDrone extends Drone {
 
 	Move nextMove() {
 		
-		if(this.numMoves <= 250 && this.power > 0) {
+		if(this.numMoves < 250 && this.power > 0) {
 
 		List<Move> zeroUtilityMoves = new ArrayList<Move>();
 		double highestNonZeroUtility = Double.NEGATIVE_INFINITY;

@@ -14,27 +14,35 @@ class MonteCarloNode {
 
 	MonteCarloNode parent;
 	ArrayList<MonteCarloNode> children = new ArrayList<MonteCarloNode>();
-	ArrayList<Direction> previous_path = new ArrayList<Direction>();
-	ArrayList<Direction> future_path = new ArrayList<Direction>();
+	ArrayList<Direction> pathFromRoot = new ArrayList<Direction>();
+	ArrayList<Direction> pathFromParent = new ArrayList<Direction>();
 	// Stack<Feature> availableNextFeatures = new Stack<Feature>();
+	ArrayList<Feature> originalFeatures;
 	ArrayList<Feature> features;
 	int depth = 0;
 	Position goalPosition;
 	Direction direction;
 	Drone simulationDrone;
 	String mapSource;
+	double coins;
 
-	MonteCarloNode(MonteCarloNode parent, Position goalPosition, String mapSource, ArrayList<Feature> features)
+	MonteCarloNode(MonteCarloNode parent, Position goalPosition, String mapSource, ArrayList<Feature> features, ArrayList<Direction> pathFromGameRoot )
 			throws IOException, CloneNotSupportedException {
 		this.goalPosition = goalPosition;
 		this.parent = parent;
 		// this.direction = direction;
 		this.mapSource = mapSource;
 		this.depth = (parent == null) ? 0 : parent.depth + 1;
-		this.features = features;
+		this.features = (ArrayList<Feature>) features.clone();
+		this.originalFeatures = (ArrayList<Feature>) features.clone();
 
-		// System.out.print("depth"+this.depth);
-		if (parent != null) {
+		
+		if (parent == null) {
+			// Root node
+			this.pathFromRoot = ((ArrayList<Direction>) pathFromGameRoot.clone());
+			
+		}
+		else {
 			// Create simulation drone based on path of current leaf
 			/*
 			 * this.simulationDrone = (Drone) parent.simulationDrone.clone(); // new //
@@ -46,9 +54,9 @@ class MonteCarloNode {
 			 */
 
 			// Compute previous path
-			this.previous_path = ((ArrayList<Direction>) parent.previous_path.clone());
+			this.pathFromRoot = ((ArrayList<Direction>) parent.pathFromRoot.clone());
 
-			// this.previous_path.add(direction);
+			// this.pathFromRoot.add(direction);
 		}
 		// TODO: Check that it is in play area
 
@@ -63,8 +71,8 @@ class MonteCarloNode {
 
 		// TODO: Compute future path from parent goal position to this.goalposition
 		if (parent != null) {
-
-			this.previous_path.addAll(parent.goalPosition.getPathToPosition(goalPosition));
+            this.pathFromParent = parent.goalPosition.getPathToPosition(goalPosition);
+			this.pathFromRoot.addAll(this.pathFromParent);
 
 		}
 
@@ -81,15 +89,18 @@ class MonteCarloNode {
 		Position goalPosition = new Position(((Point) childFeature.geometry()).latitude(),
 				((Point) childFeature.geometry()).longitude());
 		// TODO: Make a deep clone?
-		ArrayList<Feature> childFeatures = ((ArrayList<Feature>) this.features.clone());
+		ArrayList<Feature> childFeatures = ((ArrayList<Feature>) this.originalFeatures.clone());
+		childFeatures.remove(0);
 
-		MonteCarloNode child = new MonteCarloNode(this, goalPosition, this.mapSource, childFeatures);
+		MonteCarloNode child = new MonteCarloNode(this, goalPosition, this.mapSource, childFeatures,null);
+		child.coins = childFeature.getProperty("coins").getAsDouble(); //TODO: Remove
 		children.add(child);
-		return (child.previous_path.size() <= 250) ? child : null;
+		return (child.pathFromRoot.size() <= 250) ? child : null;
 
 	}
 
 	double getUCB1(double biasParam) {
+		biasParam = 1; //TODO: remove
 		// TODO: Check for null value of parent
 		return (this.total_coins / this.num_plays)
 				+ Math.sqrt(biasParam * Math.log(this.parent.num_plays) / this.num_plays);
