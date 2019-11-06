@@ -140,9 +140,9 @@ abstract class Drone implements Cloneable {
 			Feature feature = this.features.get(i);
 			double longitude = ((Point) feature.geometry()).coordinates().get(0);
 			double latitude = ((Point) feature.geometry()).coordinates().get(1);
+			Position featurePosition = new Position(latitude, longitude);
 
-			double distanceToStation = Math
-					.sqrt(Math.pow(longitude - position.longitude, 2) + Math.pow(latitude - position.latitude, 2));
+			double distanceToStation = position.getDistanceToPosition(featurePosition);
 
 			if (distanceToStation <= 0.00025 && distanceToStation < nearestDistance) {
 
