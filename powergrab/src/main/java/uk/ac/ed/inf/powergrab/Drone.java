@@ -119,6 +119,11 @@ abstract class Drone implements Cloneable {
 		return (stationPower / this.power) + (stationCoins / this.coins);
 
 	}
+	double getUtilityOfStation(double stationCoins, double stationPower, double distance) {
+
+		return ((stationPower-distance*1.25) / this.power) + (stationCoins / this.coins);
+
+	}
 	
 	// 
 

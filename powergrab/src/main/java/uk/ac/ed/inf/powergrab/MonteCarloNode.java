@@ -17,8 +17,8 @@ class MonteCarloNode {
 	ArrayList<Direction> pathFromRoot = new ArrayList<Direction>();
 	ArrayList<Direction> pathFromParent = new ArrayList<Direction>();
 	// Stack<Feature> availableNextFeatures = new Stack<Feature>();
-	ArrayList<Feature> originalFeatures;
-	ArrayList<Feature> features;
+	ArrayList<Feature> originalFeatures = new ArrayList<Feature>();
+	ArrayList<Feature> features  = new ArrayList<Feature>();
 	int depth = 0;
 	Position goalPosition;
 	Direction direction;
@@ -33,8 +33,18 @@ class MonteCarloNode {
 		// this.direction = direction;
 		this.mapSource = mapSource;
 		this.depth = (parent == null) ? 0 : parent.depth + 1;
-		this.features = (ArrayList<Feature>) features.clone();
-		this.originalFeatures = (ArrayList<Feature>) features.clone();
+		//this.features = (ArrayList<Feature>) features.clone();
+		//this.originalFeatures = (ArrayList<Feature>) features.clone();
+		
+		for(Feature feature: features) {
+			if (feature.getProperty("coins").getAsDouble() >0 || feature.getProperty("power").getAsDouble() >0) {
+				this.features.add(feature);
+				this.originalFeatures.add(feature);
+				
+			}
+			
+			
+		} 
 
 		
 		if (parent == null) {
@@ -100,10 +110,12 @@ class MonteCarloNode {
 	}
 
 	double getUCB1(double biasParam) {
-		biasParam = 1; //TODO: remove
+		biasParam = 100000; //TODO: remove
 		// TODO: Check for null value of parent
+		//System.out.println("fr"+(this.total_coins / this.num_plays));
+		//System.out.println("ba"+Math.sqrt(biasParam * Math.log(this.parent.total_coins) / this.total_coins));
 		return (this.total_coins / this.num_plays)
-				+ Math.sqrt(biasParam * Math.log(this.parent.num_plays) / this.num_plays);
+				+ Math.sqrt(biasParam * Math.log(this.parent.total_coins) / this.total_coins);
 	}
 
 	boolean isFullyExpanded() {

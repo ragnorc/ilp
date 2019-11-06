@@ -42,7 +42,7 @@ class StatefulDrone extends Drone {
 				this.features,this.path);
 
 		int i = 0;
-	/*TODO: Change back to 200*/	while (i < 300) {
+	/*TODO: Change back to 200*/	while (i < 5000) {
 			MonteCarloNode leaf = selection(root);
 			double simulation_result = rollout(leaf);
 			backpropagation(leaf, simulation_result);
@@ -50,6 +50,11 @@ class StatefulDrone extends Drone {
 			i++;
 
 		}
+	
+	if(root.children.size() == 0) {
+		
+		return null; //TODO: Return random move
+	}
 
 		//System.out.println("Next move found");
 		MonteCarloNode best = this.bestChild(root);

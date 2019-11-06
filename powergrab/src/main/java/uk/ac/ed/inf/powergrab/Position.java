@@ -32,7 +32,7 @@ public class Position {
 
 	public ArrayList<Direction> getPathToPosition(Position goalPosition) {
 		
-		//TODO: Make sure path is in play area and avoid negative stations on the way. Handle null returns 
+		//TODO: Computer direction using angle; Make sure path is in play area and avoid negative stations on the way. Handle null returns 
 
 		Position currentPosition = this;
 		ArrayList<Direction> path = new ArrayList<Direction>();
