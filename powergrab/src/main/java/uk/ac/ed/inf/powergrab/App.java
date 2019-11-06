@@ -63,7 +63,7 @@ public class App {
 			drone = new StatelessDrone(this.startPosition, 250, this.mapSource, this.seed, fileNamePrefix);
 			break;
 		case "stateful":
-			drone = new StatefulDrone(this.startPosition, 250, this.mapSource, this.seed, fileNamePrefix);
+			drone = new MonteCarloDrone(this.startPosition, 250, this.mapSource, this.seed, fileNamePrefix);
 			break;
 		default:
 			System.out.println("Drone type does not exist.");

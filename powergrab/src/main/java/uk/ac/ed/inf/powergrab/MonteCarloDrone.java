@@ -7,11 +7,12 @@ import java.util.ArrayList;
 //Lack of modifier indicates that the following class is package-private
 
 class MonteCarloDrone extends Drone {
+	
 
-	MonteCarloDrone(Position startPosition, double power, String mapSource, int seed, ArrayList<Direction> pathToFollow,
+	MonteCarloDrone(Position startPosition, double power, String mapSource, int seed,
 			String fileNamePrefix) throws IOException {
 		super(startPosition, power, mapSource, seed, fileNamePrefix);
-		this.pathToFollow = pathToFollow;
+		this.pathToFollow = new ArrayList<Direction>();
 
 	}
 
@@ -34,7 +35,7 @@ class MonteCarloDrone extends Drone {
 				int i = 0;
 				RolloutDrone bestRolloutDrone = null;
 
-				while (i < 5000) {
+				while (i < 100) {
 
 					RolloutDrone rolloutDrone = new RolloutDrone(this.startPosition, 250, this.mapSource,
 							1000 + this.random.nextInt(9000), new ArrayList<Direction>(), "mcsim" + i + ".");
@@ -45,7 +46,7 @@ class MonteCarloDrone extends Drone {
 						rolloutDrone.move(nextMove);
 						nextMove = rolloutDrone.nextMove();
 						m++;
-						// System.out.println("Simulation");
+						//System.out.println("Simulation");
 
 					}
 
@@ -58,6 +59,7 @@ class MonteCarloDrone extends Drone {
 					rolloutDrone.writeFlightPath();
 
 					rolloutDrone.flightBWriter.close();
+					i++;
 
 				}
 				this.pathToFollow.addAll(bestRolloutDrone.path);
