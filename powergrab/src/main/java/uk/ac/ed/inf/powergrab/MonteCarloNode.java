@@ -103,7 +103,7 @@ class MonteCarloNode {
 		childFeatures.remove(0);
 
 		MonteCarloNode child = new MonteCarloNode(this, goalPosition, this.mapSource, childFeatures,null);
-		child.coins = childFeature.getProperty("coins").getAsDouble(); //TODO: Remove
+		//child.coins = childFeature.getProperty("coins").getAsDouble(); //TODO: Remove
 		children.add(child);
 		return (child.pathFromRoot.size() <= 250) ? child : null;
 
