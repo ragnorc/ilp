@@ -24,7 +24,7 @@ class MonteCarloNode {
 	Direction direction;
 	Drone simulationDrone;
 	String mapSource;
-	double coins;
+	//double coins;
 
 	MonteCarloNode(MonteCarloNode parent, Position goalPosition, String mapSource, ArrayList<Feature> features, ArrayList<Direction> pathFromGameRoot )
 			throws IOException, CloneNotSupportedException {
