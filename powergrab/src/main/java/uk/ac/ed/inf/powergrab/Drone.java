@@ -38,6 +38,7 @@ abstract class Drone implements Cloneable {
 	protected String fileNamePrefix;
 	protected int seed;
 	protected ArrayList<Direction> path = new ArrayList<Direction>();
+	//TODO: Replace arrayList by stack
 	protected ArrayList<Direction> pathToFollow = new ArrayList<Direction>();
 
 	Drone(Position startPosition, double power, String mapSource, int seed, String fileNamePrefix ) throws IOException {

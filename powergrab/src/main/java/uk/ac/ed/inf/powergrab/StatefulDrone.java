@@ -58,7 +58,7 @@ class StatefulDrone extends Drone {
 
 		//System.out.println("Next move found");
 		MonteCarloNode best = this.bestChild(root);
-		 System.out.println("biggest"+best.num_plays+ " "+best.coins);
+		// System.out.println("biggest"+best.num_plays+ " "+best.coins);
 		this.pathToFollow.addAll(this.position.getPathToPosition(best.goalPosition));
 		return this.getMoveInDirection(this.position, this.pathToFollow.remove(0));
 			}
@@ -108,7 +108,7 @@ class StatefulDrone extends Drone {
 
 	double rollout(MonteCarloNode node) throws IOException, CloneNotSupportedException {
 		// TODO: Generate seed randomly
-		RolloutDrone rolloutDrone = new RolloutDrone(this.startPosition, 250, this.mapSource, 1000 + this.random.nextInt(9000), node.pathFromRoot, "sim"+node.coins+".");
+		RolloutDrone rolloutDrone = new RolloutDrone(this.startPosition, 250, this.mapSource, 1000 + this.random.nextInt(9000), node.pathFromRoot, "sim"+node.goalPosition.latitude+".");
 		//System.out.println("SimulationStart");
 		Move nextMove = rolloutDrone.nextMove();
 		int i = 1;
