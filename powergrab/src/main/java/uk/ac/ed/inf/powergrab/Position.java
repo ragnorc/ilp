@@ -31,8 +31,9 @@ public class Position {
 	}
 
 	public ArrayList<Direction> getPathToPosition(Position goalPosition) {
-		
-		//TODO: Computer direction using angle; Make sure path is in play area and avoid negative stations on the way. Handle null returns 
+
+		// TODO: Computer direction using angle; Make sure path is in play area and
+		// avoid negative stations on the way. Handle null returns
 
 		Position currentPosition = this;
 		ArrayList<Direction> path = new ArrayList<Direction>();
@@ -46,8 +47,7 @@ public class Position {
 			double shortestDistance = distanceToGoal;
 			for (Direction direction : Direction.values()) {
 				Position potentialPosition = currentPosition.nextPosition(direction);
-				double distance = Math.sqrt(Math.pow(potentialPosition.longitude - goalPosition.longitude, 2)
-						+ Math.pow(potentialPosition.latitude - goalPosition.latitude, 2));
+				double distance = potentialPosition.getDistanceToPosition(goalPosition);
 
 				if (distance <= shortestDistance) {
 
@@ -59,15 +59,20 @@ public class Position {
 			}
 			currentPosition = currentPosition.nextPosition(shortestDirection);
 
-			distanceToGoal = Math.sqrt(Math.pow(goalPosition.longitude - currentPosition.longitude, 2)
-					+ Math.pow(goalPosition.latitude - currentPosition.latitude, 2));
-			//System.out.println(distanceToGoal);
+			distanceToGoal = currentPosition.getDistanceToPosition(goalPosition);
+
 			path.add(shortestDirection);
 
 		}
-		//System.out.println("path" + i);
 
 		return path;
+
+	}
+
+	double getDistanceToPosition(Position position) {
+
+		return Math.sqrt(
+				Math.pow(this.longitude - position.longitude, 2) + Math.pow(this.latitude - position.latitude, 2));
 
 	}
 

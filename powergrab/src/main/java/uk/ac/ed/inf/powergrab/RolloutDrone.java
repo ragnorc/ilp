@@ -53,7 +53,7 @@ class RolloutDrone extends Drone {
 						double stationCoins = feature.getProperty("coins").getAsDouble();
 						double stationPower = feature.getProperty("power").getAsDouble();
 
-						availablePaths.add(this.getUtilityOfStation(stationCoins, stationPower), path);
+						availablePaths.add(this.getUtilityOfStation(stationCoins, stationPower,this.position.getDistanceToPosition(featurePosition)), path);
 
 					}
 
