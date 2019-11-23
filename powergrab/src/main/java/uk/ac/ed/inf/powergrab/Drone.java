@@ -11,7 +11,12 @@ package uk.ac.ed.inf.powergrab;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.PriorityQueue;
 import java.util.Random;
 
 import com.mapbox.geojson.Feature;
@@ -174,6 +179,54 @@ abstract class Drone implements Cloneable {
 		return move;
 
 	}
+	
+	public ArrayList<Direction> getPathToPosition(Position currentPosition, Position goalPosition) {
+
+		
+	
+		ArrayList<Direction> path = new ArrayList<Direction>();
+
+		double distanceToGoal = Double.POSITIVE_INFINITY;
+		while (distanceToGoal > 0.00025) {
+
+			
+
+			Direction shortestDirection = null;
+
+			double shortestDistance = Double.POSITIVE_INFINITY;
+			
+			for (Direction direction : Direction.values()) {
+				Position potentialPosition = currentPosition.nextPosition(direction);
+				double distance = potentialPosition.getDistanceToPosition(goalPosition);
+				
+				
+				
+				if (distance <= shortestDistance) {
+
+					shortestDistance = distance;
+					shortestDirection = direction;
+
+				}
+				
+
+			}
+		
+
+		
+			
+			
+			currentPosition = currentPosition.nextPosition(shortestDirection);
+
+			distanceToGoal = currentPosition.getDistanceToPosition(goalPosition);
+
+			path.add(shortestDirection);
+
+		}
+
+		return path;
+
+	}
+	
 	
 	public Drone clone() throws
     CloneNotSupportedException 

@@ -30,44 +30,7 @@ public class Position {
 
 	}
 
-	public ArrayList<Direction> getPathToPosition(Position goalPosition) {
 
-		// TODO: Computer direction using angle; Make sure path is in play area and
-		// avoid negative stations on the way. Handle null returns
-
-		Position currentPosition = this;
-		ArrayList<Direction> path = new ArrayList<Direction>();
-
-		double distanceToGoal = Double.POSITIVE_INFINITY;
-		int i = 0;
-		while (distanceToGoal > 0.00025) {
-			i++;
-
-			Direction shortestDirection = null;
-			double shortestDistance = distanceToGoal;
-			for (Direction direction : Direction.values()) {
-				Position potentialPosition = currentPosition.nextPosition(direction);
-				double distance = potentialPosition.getDistanceToPosition(goalPosition);
-
-				if (distance <= shortestDistance) {
-
-					shortestDistance = distance;
-					shortestDirection = direction;
-
-				}
-
-			}
-			currentPosition = currentPosition.nextPosition(shortestDirection);
-
-			distanceToGoal = currentPosition.getDistanceToPosition(goalPosition);
-
-			path.add(shortestDirection);
-
-		}
-
-		return path;
-
-	}
 
 	double getDistanceToPosition(Position position) {
 
