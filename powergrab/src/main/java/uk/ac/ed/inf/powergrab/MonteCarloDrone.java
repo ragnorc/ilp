@@ -1,13 +1,9 @@
 package uk.ac.ed.inf.powergrab;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.List;
-
+import java.util.LinkedList;
+import java.util.Queue;
 import com.mapbox.geojson.Feature;
-import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.Point;
 
 //Lack of modifier indicates that the following class is package-private
@@ -15,39 +11,22 @@ import com.mapbox.geojson.Point;
 class MonteCarloDrone extends Drone {
 	
 
-	MonteCarloDrone(Position startPosition, double power, String mapSource, int seed, ArrayList<Direction> pathToFollow, String fileNamePrefix)
+	MonteCarloDrone(Position startPosition, double power, String mapSource, int seed, String fileNamePrefix)
 			throws IOException {
 		super(startPosition, power, mapSource, seed, fileNamePrefix);
-		this.pathToFollow = pathToFollow;
 
 	}
 
-	Move nextMove() {
+	Queue<Direction> nextMoves() {
 
-		// Run previous path to update available features, power and coins
+                WeightedRandomCollection<LinkedList<Direction>> availablePaths = new WeightedRandomCollection<>(this.random);
 
-		if (this.numMoves < 250 && this.power > 0) {
 
-			if (this.pathToFollow.size() > 0) {
-			//	System.out.println("Perform path sequence to node.");
-                 // Perform moves to reach position of current node
-				// TODO: check time complexity of removing
-
-				return this.getMoveInDirection(this.position, this.pathToFollow.remove(0));
-
-			}
-
-			else {
-              //  System.out.println("Check Features");
-
-                WeightedRandomCollection<ArrayList<Direction>> availablePaths = new WeightedRandomCollection<>(this.random);
-
-				//double biggestUtility = Double.NEGATIVE_INFINITY;
 				for (Feature feature : this.features) {
 					double longitude = ((Point) feature.geometry()).coordinates().get(0);
 					double latitude = ((Point) feature.geometry()).coordinates().get(1);
 					Position featurePosition = new Position(latitude, longitude);
-					ArrayList<Direction> path = this.getPathToPosition(this.position,featurePosition);
+					LinkedList<Direction> path = this.getPathToPosition(this.position,featurePosition);
 					if (path.size() < (250 - this.numMoves) && path.size() * 1.25 <= this.power) {
 
 						double stationCoins = feature.getProperty("coins").getAsDouble();
@@ -58,33 +37,28 @@ class MonteCarloDrone extends Drone {
 					}
 
 				}
-				// Rollout policy. Pick feature with probability proportional to its utility. Implement distance dependence
 
 				if (availablePaths.size() > 0) {
-                   // System.out.println("Probabilistc Move"+availablePaths.size());
+					
+					// Rollout policy. Pick feature with probability proportional to its utility. Implement distance dependence
 
-					this.pathToFollow.addAll(availablePaths.next());
-					return this.getMoveInDirection(this.position, this.pathToFollow.remove(0));
+                   
+					return availablePaths.next();
 
 				}
 
 				else {
-                    //System.out.println("No features available. Return random move.");
-					return this.getMoveInDirection(this.position, Direction.values()[this.random.nextInt(16)]);
+					LinkedList<Direction> ret  = new LinkedList<Direction>();
+					ret.add(this.getBestRandomDirection());
+					return ret;
                    
 
 				}
 
 			}
 
-		}
+		
 
-		else {
-           // System.out.println("End"+this.numMoves);
-
-			return null;
-		}
-
-	}
+	
 
 }

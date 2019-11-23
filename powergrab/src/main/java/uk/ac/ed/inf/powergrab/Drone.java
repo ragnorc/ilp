@@ -11,14 +11,11 @@ package uk.ac.ed.inf.powergrab;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.PriorityQueue;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
-
+import java.util.Queue;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.LineString;
@@ -42,11 +39,9 @@ abstract class Drone implements Cloneable {
 	protected BufferedWriter flightBWriter;
 	protected String fileNamePrefix;
 	protected int seed;
-	protected ArrayList<Direction> path = new ArrayList<Direction>();
-	//TODO: Replace arrayList by stack
-	protected ArrayList<Direction> pathToFollow = new ArrayList<Direction>();
+	protected LinkedList<Direction> path = new LinkedList<Direction>();
 
-	Drone(Position startPosition, double power, String mapSource, int seed, String fileNamePrefix ) throws IOException {
+	Drone(Position startPosition, double power, String mapSource, int seed, String fileNamePrefix) throws IOException {
 		this.position = startPosition;
 		this.startPosition = startPosition;
 		this.power = power;
@@ -63,43 +58,57 @@ abstract class Drone implements Cloneable {
 		this.flightBWriter = new BufferedWriter(fr);
 	}
 
-	abstract Move nextMove() throws IOException, CloneNotSupportedException;
+	abstract Queue<Direction> nextMoves() throws IOException, CloneNotSupportedException;
 
-	void move(Move move) throws IOException {
-		
-
-		//System.out.println("Writestring"+i);
-		String writeString = this.position.latitude + " " + this.position.longitude + " " + move.direction.name();
+	void move(Direction direction) throws IOException {
+		Move move = this.getMoveInDirection(this.position, direction);
+		String writeString = this.position.latitude + "," + this.position.longitude + "," + move.direction.name();
 		this.position = this.position.nextPosition(move.direction);
 		this.path.add(move.direction);
-		writeString += " " + this.position.latitude + " " + this.position.longitude;
+		writeString += "," + this.position.latitude + "," + this.position.longitude;
 		Point nextPoint = Point.fromLngLat(this.position.longitude, this.position.latitude);
 		visitedPoints.add(nextPoint);
 		this.power = this.power + move.powerGain - 1.25;
 		this.coins = this.coins + move.coinGain;
-		writeString += String.format(" %f %f", this.coins, this.power);
+		writeString += String.format(",%f,%f", this.coins, this.power);
 		this.numMoves++;
 		if (move.feature != null) {
 			double oldCoins = move.feature.getProperty("coins").getAsDouble();
 			double oldPower = move.feature.getProperty("power").getAsDouble();
 			// Feature updatedFeature = move.feature);
 			// int featureIndex = this.features.indexOf(move.feature);
-			//System.out.println(move.feature);
+			// System.out.println(move.feature);
 			move.feature.removeProperty("coins");
 			move.feature.removeProperty("power");
 			move.feature.addStringProperty("coins", Double.toString(oldCoins - move.coinGain));
 			move.feature.addStringProperty("power", Double.toString(oldPower - move.powerGain));
-			//System.out.println("test" + move.powerGain);
+			// System.out.println("test" + move.powerGain);
 
 		}
 
 		this.flightBWriter.write(writeString);
 		this.flightBWriter.newLine();
 
-		//System.out.println(move.direction);
-	//	System.out.println(this.coins);
-		//System.out.println(this.power);
-		//System.out.println(this.numMoves);
+		// System.out.println(move.direction);
+		// System.out.println(this.coins);
+		// System.out.println(this.power);
+		// System.out.println(this.numMoves);
+
+	}
+
+	boolean move(Queue<Direction> moves) throws IOException {
+
+		while (moves.size() > 0) {
+
+			if (this.numMoves < 250 && this.power > 0) {
+				this.move(moves.poll());
+			} else {
+				return false;
+			}
+
+		}
+
+		return true;
 
 	}
 
@@ -110,10 +119,10 @@ abstract class Drone implements Cloneable {
 		this.orginalFeatures.add(dronePathFeature);
 		FeatureCollection featureCollection = FeatureCollection.fromFeatures(this.orginalFeatures);
 		String newMap = featureCollection.toJson().toString();
-		//System.out.println(newMap);
+		// System.out.println(newMap);
 		try (FileWriter file = new FileWriter(this.fileNamePrefix + "geojson")) {
 			file.write(newMap);
-			//System.out.println("Successfully wrote flight path to file.");
+			// System.out.println("Successfully wrote flight path to file.");
 
 		}
 
@@ -125,13 +134,14 @@ abstract class Drone implements Cloneable {
 		return (stationPower / this.power) + (stationCoins);
 
 	}
+
 	double getUtilityOfStation(double stationCoins, double stationPower, double distance) {
 
-		return ((stationPower-distance*1.25) / this.power) + stationCoins;
+		return ((stationPower - distance * 1.25) / this.power) + stationCoins;
 
 	}
-	
-	// 
+
+	//
 
 	Move getMoveInDirection(Position position, Direction direction) {
 
@@ -139,8 +149,6 @@ abstract class Drone implements Cloneable {
 		double utility = 0.0;
 		double nearestDistance = Double.POSITIVE_INFINITY;
 		Move move = new Move(direction, 0.0, 0.0, utility, null);
-		
-
 
 		for (Integer i = 0; i < this.features.size(); i++) {
 			Feature feature = this.features.get(i);
@@ -170,7 +178,6 @@ abstract class Drone implements Cloneable {
 
 				move = new Move(direction, coinGain, powerGain, utility, feature);
 				nearestDistance = distanceToStation;
-				
 
 			}
 
@@ -179,42 +186,31 @@ abstract class Drone implements Cloneable {
 		return move;
 
 	}
-	
-	public ArrayList<Direction> getPathToPosition(Position currentPosition, Position goalPosition) {
 
-		
-	
-		ArrayList<Direction> path = new ArrayList<Direction>();
+	public LinkedList<Direction> getPathToPosition(Position currentPosition, Position goalPosition) {
+
+		LinkedList<Direction> path = new LinkedList<Direction>();
 
 		double distanceToGoal = Double.POSITIVE_INFINITY;
 		while (distanceToGoal > 0.00025) {
 
-			
-
 			Direction shortestDirection = null;
 
 			double shortestDistance = Double.POSITIVE_INFINITY;
-			
+
 			for (Direction direction : Direction.values()) {
 				Position potentialPosition = currentPosition.nextPosition(direction);
 				double distance = potentialPosition.getDistanceToPosition(goalPosition);
-				
-				
-				
+
 				if (distance <= shortestDistance) {
 
 					shortestDistance = distance;
 					shortestDirection = direction;
 
 				}
-				
 
 			}
-		
 
-		
-			
-			
 			currentPosition = currentPosition.nextPosition(shortestDirection);
 
 			distanceToGoal = currentPosition.getDistanceToPosition(goalPosition);
@@ -226,15 +222,50 @@ abstract class Drone implements Cloneable {
 		return path;
 
 	}
-	
-	
-	public Drone clone() throws
-    CloneNotSupportedException 
-{ 
-	Drone cop = (Drone) super.clone();
-	//cop.features = (ArrayList<Feature>) cop.features.clone();
-	
-return cop; 
-} 
+
+	Direction getBestRandomDirection() {
+
+		List<Move> zeroUtilityMoves = new ArrayList<Move>();
+		double highestNonZeroUtility = Double.NEGATIVE_INFINITY;
+		Move currentBestMove = null;
+		for (Direction potentialDirection : Direction.values()) {
+			Position potentialPosition = this.position.nextPosition(potentialDirection);
+
+			if (potentialPosition.inPlayArea()) {
+				Move potentialMove = this.getMoveInDirection(potentialPosition, potentialDirection);
+
+				if (potentialMove.utility == 0) {
+					zeroUtilityMoves.add(potentialMove);
+				}
+
+				else if (potentialMove.utility > highestNonZeroUtility) {
+					currentBestMove = potentialMove;
+
+				}
+
+			}
+
+		}
+
+		// Pick random zero-utility move if there exists one and if no station with
+		// positive utility was found
+
+		if (currentBestMove == null || (currentBestMove.utility < 0 && zeroUtilityMoves.size() > 0)) {
+			// System.out.println("Size" + zeroUtilityMoves.size());
+
+			if (zeroUtilityMoves.size() == 1) {
+				currentBestMove = zeroUtilityMoves.get(0);
+			} else if (zeroUtilityMoves.size() != 0) {
+				currentBestMove = zeroUtilityMoves.get(0);
+
+				currentBestMove = zeroUtilityMoves.get(this.random.nextInt(zeroUtilityMoves.size() - 1));
+
+			}
+
+		}
+
+		return currentBestMove.direction;
+
+	}
 
 }

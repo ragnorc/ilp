@@ -11,7 +11,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
@@ -27,62 +29,12 @@ class StatelessDrone extends Drone {
 
 	}
 
-	Move nextMove() {
+	Queue<Direction> nextMoves() throws IOException {
 		
-		if(this.numMoves < 250 && this.power > 0) {
-
-		List<Move> zeroUtilityMoves = new ArrayList<Move>();
-		double highestNonZeroUtility = Double.NEGATIVE_INFINITY;
-		Move currentBestMove = null;
-        int numNo = 0;
-		for (Direction potentialDirection : Direction.values()) {
-			Position potentialPosition = this.position.nextPosition(potentialDirection);
-
-			if (potentialPosition.inPlayArea()) {
-				Move potentialMove = this.getMoveInDirection(potentialPosition, potentialDirection);
-
-				if (potentialMove.utility == 0) {
-					zeroUtilityMoves.add(potentialMove);
-				}
-
-				else if (potentialMove.utility > highestNonZeroUtility) {
-					currentBestMove = potentialMove;
-
-				}
-
-			}
-			else {
-				numNo++;
-			}
-
-		}
-
-		// Pick random zero-utility move if there exists one and if no station with
-		// positive utility was found
-
-		if (currentBestMove == null || (currentBestMove.utility < 0 && zeroUtilityMoves.size() > 0)) {
-			//System.out.println("Size" + zeroUtilityMoves.size());
-
-			if (zeroUtilityMoves.size() == 1) {
-				currentBestMove = zeroUtilityMoves.get(0);
-			} 
-			else if (zeroUtilityMoves.size() != 0) {
-				currentBestMove = zeroUtilityMoves.get(0);
-			
-				//System.out.println("nos"+numNo);
-				currentBestMove = zeroUtilityMoves.get(this.random.nextInt(zeroUtilityMoves.size() - 1));
-
-			}
-
-		}
-
-		return currentBestMove;
-		}
+		LinkedList<Direction> nextDirections  = new LinkedList<Direction>();
+		nextDirections.add(this.getBestRandomDirection());
+		return nextDirections;
 		
-		else {
-			
-		return null;
-		}
 
 	}
 }

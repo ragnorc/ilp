@@ -47,7 +47,7 @@ def run():
 		check_call([
 			"java", 
 			"-jar", 
-			"../out/artifacts/powergrab.jar", 
+			"powergrab.jar", 
 			"{day:02}".format(day=day),
 			"{month:02}".format(month=month),
 			"%d" % year,

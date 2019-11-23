@@ -19,35 +19,28 @@ package uk.ac.ed.inf.powergrab;
 
 import java.net.URL;
 import java.util.stream.Collectors;
-
-import com.mapbox.geojson.Feature;
-import com.mapbox.geojson.FeatureCollection;
-import com.mapbox.geojson.LineString;
-
 import java.io.BufferedReader;
-import java.io.FileWriter;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Queue;
 
 public class App {
-	private String mapSource; // url object of map
+	private String mapSource; 
 	private Position startPosition;
 	private Drone drone;
 	private int seed;
 	private String droneType;
 	private String date;
 
-	//TODO: Add class privacy settings to all classes and attributes
-	
-	// construct a new game with given parameters
 	public App(String day, String month, String year, String startLat, String startLong, String seed, String droneType)
 			throws IOException {
 
 		// Construct an URL object from mapString
 		URL mapUrl = new URL(String.format("http://homepages.inf.ed.ac.uk/stg/powergrab/%s/%s/%s/powergrabmap.geojson",
 				year, month, day));
-		
+
 		this.date = String.format("%s-%s-%s", day, month, year);
 
 		Position startPosition = new Position(Double.parseDouble(startLat), Double.parseDouble(startLong));
@@ -56,7 +49,7 @@ public class App {
 		this.seed = Integer.parseInt(seed);
 		this.mapSource = getMap(mapUrl);
 		this.droneType = droneType;
-		String fileNamePrefix = String.format("%s-%s.",this.droneType, this.date);
+		String fileNamePrefix = String.format("%s-%s.", this.droneType, this.date);
 
 		switch (droneType) {
 		case "stateless":
@@ -82,26 +75,21 @@ public class App {
 	}
 
 	public void play() throws IOException, CloneNotSupportedException {
-		// TODO: Change max moves to 250 back
-		int i = 1;
-		Move nextMove = this.drone.nextMove();
-		while (nextMove != null) {
-			
-			this.drone.move(nextMove);
-			System.out.println(nextMove.direction.name()+" Move "+i);
-			nextMove = this.drone.nextMove();
-			
-			i++;
+
+		Queue<Direction> nextMoves = this.drone.nextMoves();
+
+		while (nextMoves.size() > 0 && this.drone.move(nextMoves)) {
+
+			nextMoves = this.drone.nextMoves();
+
 		}
-		
+
 		System.out.println(this.drone.coins);
 		System.out.println(this.drone.power);
 		this.drone.flightBWriter.close();
 		this.drone.writeFlightPath();
-		
+
 	}
-
-
 
 	public static void main(String[] args) throws IOException, CloneNotSupportedException {
 

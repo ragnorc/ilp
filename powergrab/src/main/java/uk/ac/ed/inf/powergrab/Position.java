@@ -1,18 +1,17 @@
 package uk.ac.ed.inf.powergrab;
 
-import java.util.ArrayList;
 
-public class Position {
-	public double latitude;
-	public double longitude;
+class Position {
+	double latitude;
+	double longitude;
 
-	public Position(double latitude, double longitude) {
+	Position(double latitude, double longitude) {
 		this.latitude = latitude;
 		this.longitude = longitude;
 
 	}
 
-	public Position nextPosition(Direction direction) {
+	Position nextPosition(Direction direction) {
 		double r = 0.0003;
 		double degree = 90 - direction.ordinal() * 22.5;
 		double radian = Math.toRadians(degree);
@@ -23,7 +22,7 @@ public class Position {
 
 	}
 
-	public boolean inPlayArea() {
+	boolean inPlayArea() {
 
 		return this.latitude < 55.946233 && this.latitude > 55.942617 && this.longitude < -3.184319
 				&& this.longitude > -3.192473;
