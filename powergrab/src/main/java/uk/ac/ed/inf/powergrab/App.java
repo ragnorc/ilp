@@ -1,20 +1,14 @@
 
 /******************************************************************************
- *  Compilation:  javac Student.java StdIn.java
- *  Execution:    java Student n < students.txt
- *
- *  Read in an integer command-line argument n. Then, read in a list
- *  of n student records from standard input into a Student data type.
- *  Each record consists of four fields, separated by whitespace:
- *      - first name
- *      - last name
- *      - email address
- *      - which section they're in
- *
- *  Then, print out the list of the first N students in sorted order,
- *  according to their section number.
+ *  Class:       App
+ *  Author:  	 s1614102 
+ *  Description: The following class implements the desired game by parsing the 
+ *  			 initial settings of the game from the command line arguments 
+ *  			 and instantiating the appropriate drone type with the given 
+ *               start position, map and initial power.
  *
  ******************************************************************************/
+
 package uk.ac.ed.inf.powergrab;
 
 import java.net.URL;
@@ -56,7 +50,7 @@ public class App {
 			drone = new StatelessDrone(this.startPosition, 250, this.mapSource, this.seed, fileNamePrefix);
 			break;
 		case "stateful":
-			drone = new StatefulDrone(this.startPosition, 250, this.mapSource, this.seed, fileNamePrefix);
+			drone = new StatefulDrone(this.startPosition, 250, this.mapSource, this.seed, fileNamePrefix, 100);
 			break;
 		default:
 			System.out.println("Drone type does not exist.");

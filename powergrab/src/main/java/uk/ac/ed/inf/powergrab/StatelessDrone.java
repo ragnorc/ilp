@@ -8,16 +8,9 @@
 package uk.ac.ed.inf.powergrab;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 
-import com.mapbox.geojson.Feature;
-import com.mapbox.geojson.FeatureCollection;
-import com.mapbox.geojson.Point;
 
 // Lack of modifier indicates that the following class is package-private
 

@@ -1,9 +1,8 @@
 /******************************************************************************
- *  Class:   Drone 
- *  Description: Implements the attributes and methods that are shared by both the stateless and stafeful drone.
- *  Author:  Ragnor Comerford
- *
- *
+ *  Class:       Drone
+ *  Author:  	 s1614102 
+ *  Description: Abstract drone class that implements the attributes and methods 
+ *  			 that are shared by both the stateless and the stafeful drone.
  *
  ******************************************************************************/
 package uk.ac.ed.inf.powergrab;
@@ -22,6 +21,8 @@ import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 
 // Lack of modifier indicates that the following class is package-private
+
+
 
 abstract class Drone implements Cloneable {
 
@@ -57,8 +58,30 @@ abstract class Drone implements Cloneable {
 		FileWriter fr = new FileWriter(fileNamePrefix + "txt", false);
 		this.flightBWriter = new BufferedWriter(fr);
 	}
+	
+	
 
-	abstract Queue<Direction> nextMoves() throws IOException, CloneNotSupportedException;
+	/**
+	 *	Method:	    	nextMoves
+	 *	Description:	The following method implements the different type of drone's strategy of determining the next move.
+	 *                  It is defined as abstract since the strategy is not general but depends on the drone type and hence 
+	 *                  needs to be implemented by the subclasses.
+	 */
+	
+	abstract Queue<Direction> nextMoves() throws IOException;
+	
+	
+	/** 
+	 *	Method: 		move
+	 *	Description:	The following method performs the actions that are required by the rules of the game
+	 *  				when moving in a certain direction. It is implemented in the drone super class because
+	 *  				the procedure is the same for both the stateful and stateless drone.
+	 *  				Given a direction that the drone has decided to move to, this method decreases the power 
+	 *  				of the drone by 1.25 as specified in the instructions and performs the exchange of coins 
+	 *  				and power in case a station is in reach. Additionally, this methods writes the current move
+	 * 					to a text file as required for the submission.
+	 *
+	 */
 
 	void move(Direction direction) throws IOException {
 		Move move = this.getMoveInDirection(this.position, direction);
@@ -75,24 +98,18 @@ abstract class Drone implements Cloneable {
 		if (move.feature != null) {
 			double oldCoins = move.feature.getProperty("coins").getAsDouble();
 			double oldPower = move.feature.getProperty("power").getAsDouble();
-			// Feature updatedFeature = move.feature);
-			// int featureIndex = this.features.indexOf(move.feature);
-			// System.out.println(move.feature);
+			
 			move.feature.removeProperty("coins");
 			move.feature.removeProperty("power");
 			move.feature.addStringProperty("coins", Double.toString(oldCoins - move.coinGain));
 			move.feature.addStringProperty("power", Double.toString(oldPower - move.powerGain));
-			// System.out.println("test" + move.powerGain);
+			
 
 		}
 
 		this.flightBWriter.write(writeString);
 		this.flightBWriter.newLine();
 
-		// System.out.println(move.direction);
-		// System.out.println(this.coins);
-		// System.out.println(this.power);
-		// System.out.println(this.numMoves);
 
 	}
 
@@ -141,7 +158,7 @@ abstract class Drone implements Cloneable {
 
 	}
 
-	//
+	
 
 	Move getMoveInDirection(Position position, Direction direction) {
 
