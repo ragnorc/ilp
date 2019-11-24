@@ -71,10 +71,16 @@ public class App {
 	public void play() throws IOException, CloneNotSupportedException {
 
 		Queue<Direction> nextMoves = this.drone.nextMoves();
+		
+		boolean completed = this.drone.move(nextMoves);
 
-		while (nextMoves.size() > 0 && this.drone.move(nextMoves)) {
+		while (!completed ) {
+			
+			System.out.println("Computer");
+
 
 			nextMoves = this.drone.nextMoves();
+            completed = this.drone.move(nextMoves);
 
 		}
 

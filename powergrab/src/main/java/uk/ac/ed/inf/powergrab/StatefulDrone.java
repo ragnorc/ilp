@@ -30,16 +30,24 @@ class StatefulDrone extends Drone {
 		MonteCarloDrone bestRolloutDrone = null;
 
 		while (i < this.numSimulations) {
+			//System.out.println("one");
 
 			MonteCarloDrone rolloutDrone = new MonteCarloDrone(this.startPosition, 250, this.mapSource,
 					1000 + this.random.nextInt(9000), "mcsim.");
 
 			Queue<Direction> nextMoves = rolloutDrone.nextMoves();
+			boolean completed = rolloutDrone.move(nextMoves);
 
-			while (nextMoves.size() > 0 && rolloutDrone.move(nextMoves)) {
+			int b = 0;
+
+			while (!completed) {
+				
 
 				nextMoves = rolloutDrone.nextMoves();
-
+				completed = rolloutDrone.move(nextMoves);
+				
+				
+b++;
 			}
 
 			if (bestRolloutDrone == null || rolloutDrone.coins > bestRolloutDrone.coins) {

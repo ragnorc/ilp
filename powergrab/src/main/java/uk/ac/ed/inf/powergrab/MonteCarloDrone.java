@@ -6,7 +6,19 @@ import java.util.Queue;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.Point;
 
-//Lack of modifier indicates that the following class is package-private
+
+
+/******************************************************************************
+ *  Class:       MonteCarloDrone
+ *  Author:  	 s1614102 
+ *  Description: This class implements the Monte Carlo drone that is used by the
+ *  			 stateful drone to run the simulations to find the best path. The Monte Carlo
+ *  			 drone itself selects its moves according to a probability distribution
+ *  			 in which the probability of a move is proportional to its utility. That way
+ *  			 the Monte Carlo drone will occasionally perform non-greedy moves that
+ *  			 might lead to more optimal path overall.
+ *
+ ******************************************************************************/
 
 class MonteCarloDrone extends Drone {
 	
@@ -16,6 +28,19 @@ class MonteCarloDrone extends Drone {
 		super(startPosition, power, mapSource, seed, fileNamePrefix);
 
 	}
+	
+	/**
+	 * Method: nextMoves
+	 * Description: The following method defines the move selection strategy of the simulation drone.
+	 * 				It iterates through all the stations on the map that are available and adds paths to positive-utility
+	 *              stations alongside their respective utilities as weights to the custom probabilistic 
+	 *              data structure 'WeightedRandomCollection' which is explained in its own class definition. 
+	 *              It then randomly picks a path from the random collection and returns it. If the the random collection
+	 *              is empty, usually when all positive stations have been visited, it picks a random move in the same
+	 *              way the stateless drone would pick a random move. 
+	 *
+	 */
+
 
 	Queue<Direction> nextMoves() {
 
@@ -31,8 +56,8 @@ class MonteCarloDrone extends Drone {
 
 						double stationCoins = feature.getProperty("coins").getAsDouble();
 						double stationPower = feature.getProperty("power").getAsDouble();
-
-						availablePaths.add(this.getUtilityOfStation(stationCoins, stationPower,this.position.getDistanceToPosition(featurePosition)), path);
+						int numMovesToStation = this.getPathToPosition(this.position, featurePosition).size();
+						availablePaths.add(this.getUtilityOfStation(stationCoins, stationPower,numMovesToStation), path);
 
 					}
 
@@ -40,14 +65,14 @@ class MonteCarloDrone extends Drone {
 
 				if (availablePaths.size() > 0) {
 					
-					// Rollout policy. Pick feature with probability proportional to its utility. Implement distance dependence
-
+					// Rollout policy: Pick feature with probability proportional to its utility.
                    
 					return availablePaths.next();
 
 				}
 
 				else {
+					//No stations available anymore. Pick the best (random) move.
 					LinkedList<Direction> ret  = new LinkedList<Direction>();
 					ret.add(this.getBestRandomDirection());
 					return ret;

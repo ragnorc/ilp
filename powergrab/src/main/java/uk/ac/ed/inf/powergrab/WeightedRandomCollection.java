@@ -18,6 +18,7 @@ public class WeightedRandomCollection<E> {
     }
 
     public WeightedRandomCollection<E> add(double weight, E result) {
+    	
         if (weight <= 0) return this;
         total += weight;
         map.put(total, result);
