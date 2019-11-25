@@ -1,8 +1,8 @@
 /******************************************************************************
- *  Class:   Drone 
- *  Author:  Ragnor Comerford
- *
- *
+ *  Class:       StatelessDrone
+ *  Author:  	 s1614102 
+ *  Description: The following class is a subclass of Drone and implements the 
+ *  			 strategy of the stateless drone for determining the best next moves.
  *
  ******************************************************************************/
 package uk.ac.ed.inf.powergrab;
@@ -23,8 +23,9 @@ class StatelessDrone extends Drone {
 	}
 
 	Queue<Direction> nextMoves() throws IOException {
-		
+
 		LinkedList<Direction> nextDirections  = new LinkedList<Direction>();
+		// Computes the best direction among all 16 available directions (The logic of that method is explained in the Drone class and the report).
 		nextDirections.add(this.getBestRandomDirection());
 		return nextDirections;
 		

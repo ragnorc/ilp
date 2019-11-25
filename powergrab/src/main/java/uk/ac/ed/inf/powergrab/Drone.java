@@ -159,7 +159,7 @@ abstract class Drone {
 
 	double getUtilityOfStation(double stationCoins, double stationPower, int numMovesToStation) {
 
-		return 0.5*stationPower  +  5*stationCoins - 20*numMovesToStation;
+		return stationCoins/numMovesToStation;
 
 
 	}
@@ -241,23 +241,34 @@ abstract class Drone {
 		return move;
 
 	}
+	
+	/**
+	 * Method: 		getPathToPosition 
+	 * Description:	The method computes the best best path to a given goal position. It iterates through the directions,
+	 * 				picks the direction that brings the drone closest to the goal and that doesn't lead to a loss of coins and then repeats. In
+	 * 				case the function can't find a path that avoids negative stations, it just returns null. The function caller then
+	 * 				ignores that goalPosition for now.
+     *
+	 * 				
+	 * 				
+	 */ 
 
 	public LinkedList<Direction> getPathToPosition(Position currentPosition, Position goalPosition) {
 
 		LinkedList<Direction> path = new LinkedList<Direction>();
 
 		double distanceToGoal = Double.POSITIVE_INFINITY;
-		int i = 0;
-        Set<Double> hash_Set = new TreeSet<Double>(); 
+        Set<Double> visitedDistances = new TreeSet<Double>(); 
 
 		while (distanceToGoal > 0.00025) {
-			if (hash_Set.contains(distanceToGoal)) {
+			
+			// If the exact distance was seen before, we can be confident that the drone is stuck in a loop. Return null to drop that path.
+			if (visitedDistances.contains(distanceToGoal)) {
 				return null;
 				
 			}
-			hash_Set.add(distanceToGoal);
-			
-            //System.out.println(distanceToGoal);
+			visitedDistances.add(distanceToGoal);
+
 			Direction shortestDirection = null;
 			Double shortestDistance = null;
 
@@ -272,8 +283,8 @@ abstract class Drone {
 					shortestDistance = distance;
 				}
 				Feature station = this.getNearestStation(potentialPosition);
-				if (distance <= shortestDistance && ((station == null /*|| i > 50*/) || (station.getProperty("coins").getAsDouble() > -2) )) {
-					//System.out.println(move.utility+" "+ distance);
+				// Ignore directions that lead to visiting a negative station.
+				if (distance <= shortestDistance && ((station == null) || (station.getProperty("coins").getAsDouble() > -2) )) {
 
 					shortestDistance = distance;
 					shortestDirection = direction;
@@ -285,7 +296,6 @@ abstract class Drone {
 			distanceToGoal = currentPosition.getDistanceToPosition(goalPosition);
 			
 			path.add(shortestDirection);
-			i++;
 
 		}
 

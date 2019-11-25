@@ -4,6 +4,16 @@ import java.util.NavigableMap;
 import java.util.Random;
 import java.util.TreeMap;
 
+
+/******************************************************************************
+ *  Class:       WeightedRandomCollection
+ *  Author:  	 s1614102 
+ *  Description: This class represents the data structure used for picking items
+ *  			 with a probability proportional to the given weight. In the context
+ *  			 of the drone, the weight is the utility of the given station.
+ *
+ ******************************************************************************/
+
 public class WeightedRandomCollection<E> {
     private final NavigableMap<Double, E> map = new TreeMap<Double, E>();
     private final Random random;
@@ -24,7 +34,14 @@ public class WeightedRandomCollection<E> {
         map.put(total, result);
         return this;
     }
-
+    
+    
+    /**
+	 * Method: next
+	 * Description: Picks an element according to the probability distribution described above.
+	 *
+	 */
+    
     public E next() {
     	if (map.size() <=2) {
     		return map.firstEntry().getValue();

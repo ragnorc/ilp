@@ -1,8 +1,8 @@
 /******************************************************************************
  *  Class:       StatefulDrone
  *  Author:  	 s1614102 
- *  Description: The following class implements the strategy of the stateful drone 
- *  			 for determining the best next moves.
+ *  Description: The following class is a subclass of Drone and implements the 
+ *  			 strategy of the stateful drone for determining the best next moves.
  *
  ******************************************************************************/
 
@@ -14,11 +14,11 @@ import java.util.Queue;
 //Lack of modifier indicates that the following class is package-private
 
 class StatefulDrone extends Drone {
-	
+
 	int numSimulations;
 
-	StatefulDrone(Position startPosition, double power, String mapSource, int seed, String fileNamePrefix, int numSimulations)
-			throws IOException {
+	StatefulDrone(Position startPosition, double power, String mapSource, int seed, String fileNamePrefix,
+			int numSimulations) throws IOException {
 		super(startPosition, power, mapSource, seed, fileNamePrefix);
 		this.numSimulations = numSimulations;
 
@@ -38,16 +38,11 @@ class StatefulDrone extends Drone {
 			Queue<Direction> nextMoves = rolloutDrone.nextMoves();
 			boolean completed = rolloutDrone.move(nextMoves);
 
-			int b = 0;
-
 			while (!completed) {
-				
 
 				nextMoves = rolloutDrone.nextMoves();
 				completed = rolloutDrone.move(nextMoves);
-				
-				
-b++;
+
 			}
 
 			if (bestRolloutDrone == null || rolloutDrone.coins > bestRolloutDrone.coins) {

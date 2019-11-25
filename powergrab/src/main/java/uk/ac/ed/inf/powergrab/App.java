@@ -72,11 +72,11 @@ public class App {
 
 		Queue<Direction> nextMoves = this.drone.nextMoves();
 		
+		// If the drone exceeds the number of moves or runs out of power the variable completed is set to true.
+		
 		boolean completed = this.drone.move(nextMoves);
 
 		while (!completed ) {
-			
-			System.out.println("Computer");
 
 
 			nextMoves = this.drone.nextMoves();
