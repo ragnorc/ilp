@@ -52,11 +52,15 @@ class MonteCarloDrone extends Drone {
 					double latitude = ((Point) feature.geometry()).coordinates().get(1);
 					Position featurePosition = new Position(latitude, longitude);
 					LinkedList<Direction> path = this.getPathToPosition(this.position,featurePosition);
+					if (path == null) {
+						continue;
+						
+					}
 					if (path.size() < (250 - this.numMoves) && path.size() * 1.25 <= this.power) {
 
 						double stationCoins = feature.getProperty("coins").getAsDouble();
 						double stationPower = feature.getProperty("power").getAsDouble();
-						int numMovesToStation = this.getPathToPosition(this.position, featurePosition).size();
+						int numMovesToStation = path.size();
 						availablePaths.add(this.getUtilityOfStation(stationCoins, stationPower,numMovesToStation), path);
 
 					}

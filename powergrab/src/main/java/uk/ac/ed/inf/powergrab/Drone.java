@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.Queue;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
@@ -162,6 +164,39 @@ abstract class Drone {
 
 	}
 	
+	Feature getNearestStation(Position position){
+		Feature ret = null;
+		
+		double nearestDistance = Double.POSITIVE_INFINITY;
+
+		
+		for (Integer i = 0; i < this.features.size(); i++) {
+			Feature feature = this.features.get(i);
+			double longitude = ((Point) feature.geometry()).coordinates().get(0);
+			double latitude = ((Point) feature.geometry()).coordinates().get(1);
+			Position featurePosition = new Position(latitude, longitude);
+
+			double distanceToStation = position.getDistanceToPosition(featurePosition);
+
+			//Get nearest station
+			if (distanceToStation <= 0.00025 && distanceToStation < nearestDistance) {
+
+				
+				ret =  feature;
+				
+
+			}
+
+		}
+		
+		
+		
+		
+		return ret;
+		
+	}
+	
+	
 	/**
 	 * Method: 		getMoveInDirection (polymorphic) 
 	 * Description:	The method returns a move object containing the properties of the move such as coin and power gain.
@@ -174,22 +209,15 @@ abstract class Drone {
 
 		// A position with no features has a basis utility of 0.
 		double utility = 0.0;
-		double nearestDistance = Double.POSITIVE_INFINITY;
 		Move move = new Move(direction, 0.0, 0.0, utility, null);
+        
+		Feature station = this.getNearestStation(position);
+		
+		if(station != null) {
+			double coinGain = station.getProperty("coins").getAsDouble();
+			double powerGain = station.getProperty("power").getAsDouble();
 
-		for (Integer i = 0; i < this.features.size(); i++) {
-			Feature feature = this.features.get(i);
-			double longitude = ((Point) feature.geometry()).coordinates().get(0);
-			double latitude = ((Point) feature.geometry()).coordinates().get(1);
-			Position featurePosition = new Position(latitude, longitude);
-
-			double distanceToStation = position.getDistanceToPosition(featurePosition);
-
-			//Get nearest station
-			if (distanceToStation <= 0.00025 && distanceToStation < nearestDistance) {
-
-				double coinGain = feature.getProperty("coins").getAsDouble();
-				double powerGain = feature.getProperty("power").getAsDouble();
+			
 				if (coinGain < 0) {
 					// Drone can only loose as much coins as it owns. No debt allowed
 					coinGain = Math.max(coinGain, (-1) * this.coins); 
@@ -203,12 +231,12 @@ abstract class Drone {
 
 				utility = this.getUtilityOfStation(coinGain, powerGain);
 
-				move = new Move(direction, coinGain, powerGain, utility, feature);
-				nearestDistance = distanceToStation;
+				move = new Move(direction, coinGain, powerGain, utility, station);
+				
 
-			}
-
+			
 		}
+		
 
 		return move;
 
@@ -219,17 +247,33 @@ abstract class Drone {
 		LinkedList<Direction> path = new LinkedList<Direction>();
 
 		double distanceToGoal = Double.POSITIVE_INFINITY;
+		int i = 0;
+        Set<Double> hash_Set = new TreeSet<Double>(); 
+
 		while (distanceToGoal > 0.00025) {
-
+			if (hash_Set.contains(distanceToGoal)) {
+				return null;
+				
+			}
+			hash_Set.add(distanceToGoal);
+			
+            //System.out.println(distanceToGoal);
 			Direction shortestDirection = null;
-
-			double shortestDistance = Double.POSITIVE_INFINITY;
+			Double shortestDistance = null;
 
 			for (Direction direction : Direction.values()) {
 				Position potentialPosition = currentPosition.nextPosition(direction);
+				if (!potentialPosition.inPlayArea()) {
+					continue;
+				}
 				double distance = potentialPosition.getDistanceToPosition(goalPosition);
-
-				if (distance <= shortestDistance) {
+				if (shortestDirection == null) {
+					shortestDirection = direction;
+					shortestDistance = distance;
+				}
+				Feature station = this.getNearestStation(potentialPosition);
+				if (distance <= shortestDistance && ((station == null /*|| i > 50*/) || (station.getProperty("coins").getAsDouble() > -2) )) {
+					//System.out.println(move.utility+" "+ distance);
 
 					shortestDistance = distance;
 					shortestDirection = direction;
@@ -239,7 +283,9 @@ abstract class Drone {
 			}
 			currentPosition = currentPosition.nextPosition(shortestDirection);
 			distanceToGoal = currentPosition.getDistanceToPosition(goalPosition);
+			
 			path.add(shortestDirection);
+			i++;
 
 		}
 
