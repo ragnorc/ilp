@@ -81,6 +81,7 @@ abstract class Drone {
 	 */
 
 	void move(Direction direction) throws IOException {
+		
 		Move move = this.getMoveInDirection(this.position, direction);
 		String writeString = this.position.latitude + "," + this.position.longitude + "," + move.direction.name();
 		this.position = this.position.nextPosition(move.direction);
@@ -167,8 +168,7 @@ abstract class Drone {
 		double nearestDistance = Double.POSITIVE_INFINITY;
 
 		
-		for (Integer i = 0; i < this.features.size(); i++) {
-			Feature feature = this.features.get(i);
+		for (Feature feature: this.features) {
 			double longitude = ((Point) feature.geometry()).coordinates().get(0);
 			double latitude = ((Point) feature.geometry()).coordinates().get(1);
 			Position featurePosition = new Position(latitude, longitude);
@@ -180,6 +180,7 @@ abstract class Drone {
 
 				
 				ret =  feature;
+				nearestDistance = distanceToStation;
 				
 
 			}
@@ -208,7 +209,7 @@ abstract class Drone {
 		double utility = 0.0;
 		Move move = new Move(direction, 0.0, 0.0, utility, null);
         
-		Feature station = this.getNearestStation(position);
+		Feature station = this.getNearestStation(position.nextPosition(direction));
 		
 		if(station != null) {
 			double coinGain = station.getProperty("coins").getAsDouble();
